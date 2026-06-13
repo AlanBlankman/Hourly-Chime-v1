@@ -11,189 +11,51 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg: #0f1117;
-    --surface: #1a1f2e;
-    --surface2: #222840;
-    --border: #2d3555;
-    --amber: #f59e0b;
-    --amber-glow: rgba(245,158,11,0.15);
-    --green: #10b981;
-    --red: #ef4444;
-    --text: #e2e8f0;
-    --text-muted: #64748b;
-    --text-dim: #94a3b8;
+    --bg: #0f1117; --surface: #1a1f2e; --surface2: #222840;
+    --border: #2d3555; --amber: #f59e0b; --amber-glow: rgba(245,158,11,0.15);
+    --green: #10b981; --red: #ef4444;
+    --text: #e2e8f0; --text-muted: #64748b; --text-dim: #94a3b8;
     --radius: 14px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding-bottom: 80px;
-    -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100dvh; max-width: 480px; margin: 0 auto;
+    padding-bottom: 80px; -webkit-tap-highlight-color: transparent;
   }
 
   /* Header */
   header {
-    padding: 16px 20px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0;
-    background: var(--bg);
-    z-index: 50;
+    padding: 16px 20px 12px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 50;
   }
-  header h1 {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 18px; font-weight: 600;
-    letter-spacing: 0.04em; color: var(--amber);
-  }
-  #live-clock {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; color: var(--text-dim); letter-spacing: 0.06em;
-  }
+  header h1 { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; color: var(--amber); }
+  #live-clock { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); letter-spacing: 0.06em; }
 
   /* Master card */
   .master-card {
-    margin: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
+    margin: 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
   .master-label { display: flex; flex-direction: column; gap: 3px; }
   .master-label .title { font-size: 16px; font-weight: 600; color: var(--text); }
   .master-label .sub { font-size: 12px; color: var(--text-muted); }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--red); display: inline-block; margin-right: 6px; transition: background 0.3s;
-  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; transition: background 0.3s; }
   .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
 
   /* Toggle */
   .toggle { position: relative; width: 52px; height: 28px; cursor: pointer; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track {
-    position: absolute; inset: 0;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 14px; transition: background 0.25s, border-color 0.25s;
-  }
+  .toggle-track { position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; transition: background 0.25s, border-color 0.25s; }
   .toggle input:checked ~ .toggle-track { background: var(--amber); border-color: var(--amber); }
-  .toggle-thumb {
-    position: absolute; top: 4px; left: 4px;
-    width: 20px; height: 20px; background: #fff; border-radius: 50%;
-    transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-  }
+  .toggle-thumb { position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
   .toggle input:checked ~ .toggle-track ~ .toggle-thumb { transform: translateX(24px); }
-
-  /* Arc card */
-  .arc-card {
-    margin: 0 16px 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-  }
-  .arc-title {
-    font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.12em; color: var(--text-muted); align-self: flex-start;
-  }
-  #arc-svg { width: 220px; height: 220px; }
-
-  /* Section */
-  .section {
-    margin: 0 16px 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden;
-  }
-  .section-header {
-    padding: 14px 18px;
-    font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.12em; color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    background: rgba(255,255,255,0.02);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .section-body { padding: 16px 18px; }
-
-  /* Chime grid */
-  .chime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .chime-btn {
-    background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 10px; padding: 12px 10px; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .chime-btn.selected { border-color: var(--amber); background: var(--amber-glow); }
-  .chime-btn .icon { font-size: 22px; }
-  .chime-btn .label { font-size: 12px; font-weight: 500; color: var(--text-dim); text-align: center; line-height: 1.3; }
-  .chime-btn.selected .label { color: var(--amber); }
-
-  .action-btn {
-    margin-top: 8px; width: 100%;
-    background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 10px; padding: 12px;
-    color: var(--text-dim); font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .action-btn:active { border-color: var(--amber); color: var(--amber); }
-
-  /* Time range */
-  .time-range-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .time-range-row label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-  .time-input {
-    background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 8px; padding: 8px 10px; color: var(--text);
-    font-family: 'JetBrains Mono', monospace; font-size: 15px;
-    width: 96px; outline: none; text-align: center;
-    -webkit-appearance: none; appearance: none;
-  }
-  .time-input:focus { border-color: var(--amber); }
-  .time-range-sep { color: var(--text-muted); font-size: 14px; }
-
-  /* Day grid */
-  .day-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .day-btn {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: var(--surface2); border: 1.5px solid var(--border);
-    color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
-  }
-  .day-btn.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); }
-
-  /* Presets */
-  .preset-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
-  .preset-btn {
-    padding: 7px 13px; background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 20px; color: var(--text-dim); font-size: 12px; font-weight: 500;
-    cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif;
-  }
-  .preset-btn:active { border-color: var(--amber); color: var(--amber); }
-
-  /* Hour grid */
-  .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
-  .hour-cell {
-    aspect-ratio: 1; border-radius: 7px;
-    background: var(--surface2); border: 1.5px solid var(--border);
-    color: var(--text-muted); font-size: 11px;
-    font-family: 'JetBrains Mono', monospace; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.12s; user-select: none;
-  }
-  .hour-cell.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); font-weight: 600; }
-  .hour-cell.disabled { opacity: 0.25; cursor: not-allowed; }
 
   /* Next chime banner */
   .next-banner {
-    margin: 0 16px 16px;
-    background: var(--surface); border: 1px solid var(--border);
+    margin: 0 16px 12px; background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 14px 18px;
     display: flex; align-items: center; justify-content: space-between;
   }
@@ -201,167 +63,178 @@
   .next-time { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: var(--amber); }
   .next-countdown { font-size: 12px; color: var(--text-muted); }
 
-  /* Tabs */
-  .tabs {
-    display: flex; margin: 16px 16px 0;
-    border-bottom: 1px solid var(--border); gap: 2px;
+  /* Message box */
+  .message-card {
+    margin: 0 16px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
   }
-  .tab {
-    padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted);
-    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-    transition: color 0.15s, border-color 0.15s;
-    background: none; border-top: none; border-left: none; border-right: none;
-    font-family: 'Inter', sans-serif;
+  .message-card label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .message-input {
+    flex: 1; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
   }
-  .tab.active { color: var(--amber); border-bottom-color: var(--amber); }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+  .message-input:focus { border-color: var(--amber); }
+  .message-input::placeholder { color: var(--text-muted); }
+
+  /* Arc card */
+  .arc-card {
+    margin: 0 16px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .arc-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); align-self: flex-start; }
+  #arc-svg { width: 220px; height: 220px; }
+
+  /* Section */
+  .section { margin: 0 16px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .section-header {
+    padding: 14px 18px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-body { padding: 16px 18px; }
+
+  /* Sound selector — dropdown + recents */
+  .sound-select-wrap { position: relative; margin-bottom: 14px; }
+  .sound-select {
+    width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 36px 12px 14px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+  }
+  .sound-select:focus { border-color: var(--amber); }
+  .sound-select-arrow {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--text-muted); font-size: 12px;
+  }
+  .recents-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .recents-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+  .recent-btn {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 10px 6px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .recent-btn.selected { border-color: var(--amber); background: var(--amber-glow); }
+  .recent-btn .icon { font-size: 20px; }
+  .recent-btn .label { font-size: 10px; font-weight: 500; color: var(--text-muted); text-align: center; line-height: 1.2; }
+  .recent-btn.selected .label { color: var(--amber); }
+
+  /* Vibrate row */
+  .vibrate-row { display: flex; gap: 8px; margin-top: 4px; }
+  .vib-btn {
+    flex: 1; padding: 10px 8px; background: var(--surface2);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; transition: border-color 0.15s, background 0.15s;
+  }
+  .vib-btn.active { border-color: var(--amber); background: var(--amber-glow); }
+  .vib-btn .icon { font-size: 18px; }
+  .vib-btn .label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .vib-btn.active .label { color: var(--amber); }
+
+  /* Action btn */
+  .action-btn {
+    margin-top: 8px; width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px; color: var(--text-dim);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .action-btn:active { border-color: var(--amber); color: var(--amber); }
 
   /* Volume */
   .vol-row { display: flex; align-items: center; gap: 10px; }
   .vol-row span { font-size: 12px; color: var(--text-muted); width: 28px; text-align: right; }
-  input[type=range] {
-    flex: 1; -webkit-appearance: none; height: 4px;
-    border-radius: 2px; background: var(--surface2); outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 18px; height: 18px;
-    border-radius: 50%; background: var(--amber); cursor: pointer;
-  }
+  input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--surface2); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--amber); cursor: pointer; }
+
+  /* Time range */
+  .time-range-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .time-range-row label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .time-input { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px; width: 96px; outline: none; text-align: center; -webkit-appearance: none; appearance: none; }
+  .time-input:focus { border-color: var(--amber); }
+  .time-range-sep { color: var(--text-muted); font-size: 14px; }
+
+  /* Day grid */
+  .day-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .day-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--surface2); border: 1.5px solid var(--border); color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .day-btn.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); }
+
+  /* Presets */
+  .preset-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  .preset-btn { padding: 7px 13px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 20px; color: var(--text-dim); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+  .preset-btn:active { border-color: var(--amber); color: var(--amber); }
+
+  /* Hour grid */
+  .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+  .hour-cell { aspect-ratio: 1; border-radius: 7px; background: var(--surface2); border: 1.5px solid var(--border); color: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; user-select: none; }
+  .hour-cell.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); font-weight: 600; }
+  .hour-cell.disabled { opacity: 0.25; cursor: not-allowed; }
 
   /* Timeout chips */
   .timeout-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .timeout-chip {
-    padding: 6px 14px; background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 20px; color: var(--text-muted); font-size: 12px; font-weight: 500;
-    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
-  }
+  .timeout-chip { padding: 6px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 20px; color: var(--text-muted); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
   .timeout-chip.selected { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
 
-  /* ── DISMISS OVERLAY ── */
-  #dismiss-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(10, 12, 20, 0.97);
-    flex-direction: column; align-items: center; justify-content: center;
-    gap: 24px; padding: 32px;
-  }
-  #dismiss-overlay.active { display: flex; }
+  /* Notifications */
+  .notif-card { display: flex; align-items: flex-start; gap: 14px; }
+  .notif-icon-wrap { width: 42px; height: 42px; border-radius: 12px; background: var(--amber-glow); border: 1px solid rgba(245,158,11,0.3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .notif-text { flex: 1; }
+  .notif-text .ntitle { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .notif-text .nsub { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .nperm { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; padding: 3px 8px; border-radius: 10px; }
+  .nperm .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .nperm.granted { color: var(--green); background: rgba(16,185,129,0.1); }
+  .nperm.granted .dot { background: var(--green); box-shadow: 0 0 5px var(--green); }
+  .nperm.denied { color: var(--red); background: rgba(239,68,68,0.1); }
+  .nperm.denied .dot { background: var(--red); }
+  .nperm.unknown { color: var(--text-muted); background: rgba(255,255,255,0.05); }
+  .nperm.unknown .dot { background: var(--text-muted); }
+  .notif-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .notif-req-btn { padding: 8px 18px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .notif-req-btn.primary { background: var(--amber); color: #000; }
+  .notif-req-btn.primary:active { opacity: 0.8; }
+  .notif-req-btn.secondary { background: var(--surface2); border: 1.5px solid var(--border); color: var(--text-dim); }
+  .ios-note { margin-top: 10px; padding: 10px 12px; background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 
-  .dismiss-hour {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 60px; font-weight: 600; color: var(--amber);
-    letter-spacing: -2px; line-height: 1;
-  }
-  .dismiss-label {
-    font-size: 13px; font-weight: 600; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.14em; margin-top: -14px;
-  }
+  /* Tabs */
+  .tabs { display: flex; margin: 16px 16px 0; border-bottom: 1px solid var(--border); gap: 2px; }
+  .tab { padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Inter', sans-serif; }
+  .tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
-  /* Countdown ring */
-  #ring-wrap { position: relative; width: 148px; height: 148px; }
-  #ring-svg { width: 148px; height: 148px; transform: rotate(-90deg); }
-  #ring-track { fill: none; stroke: var(--surface2); stroke-width: 9; }
-  #ring-fill {
-    fill: none; stroke: var(--amber); stroke-width: 9; stroke-linecap: round;
-    transition: stroke-dashoffset 0.95s linear, stroke 0.4s;
-  }
-  #ring-num {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 38px; font-weight: 600; color: var(--text);
-  }
-
-  /* Dismiss button */
-  #dismiss-btn {
-    width: 100%; max-width: 320px; padding: 22px;
-    background: var(--amber); border: none; border-radius: 18px;
-    font-family: 'Inter', sans-serif; font-size: 19px; font-weight: 700;
-    color: #000; cursor: pointer; letter-spacing: 0.04em;
-    box-shadow: 0 0 48px rgba(245,158,11,0.4);
-    transition: transform 0.1s, box-shadow 0.1s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  #dismiss-btn:active { transform: scale(0.97); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
-  .dismiss-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
-
-  /* ── MISSED ALARMS ── */
+  /* Missed alarms */
   .missed-list { display: flex; flex-direction: column; gap: 8px; }
-  .missed-item {
-    display: flex; align-items: center; gap: 12px;
-    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
-    border-radius: 10px; padding: 12px 14px;
-    animation: fadeSlide 0.3s ease;
-  }
+  .missed-item { display: flex; align-items: center; gap: 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 12px 14px; animation: fadeSlide 0.3s ease; }
   @keyframes fadeSlide { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
   .missed-icon { font-size: 20px; flex-shrink: 0; }
   .missed-text { flex: 1; }
   .missed-time { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--red); }
   .missed-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .clear-missed-btn {
-    margin-top: 10px; width: 100%;
-    background: transparent; border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px; color: var(--text-muted);
-    font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-  }
+  .clear-missed-btn { margin-top: 10px; width: 100%; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 8px; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; }
   .clear-missed-btn:active { color: var(--red); border-color: var(--red); }
 
-  /* Notification card */
-  .notif-card { display:flex; align-items:flex-start; gap:14px; }
-  .notif-icon-wrap {
-    width:42px; height:42px; border-radius:12px;
-    background:var(--amber-glow); border:1px solid rgba(245,158,11,0.3);
-    display:flex; align-items:center; justify-content:center;
-    font-size:20px; flex-shrink:0;
-  }
-  .notif-text { flex:1; }
-  .notif-text .ntitle { font-size:14px; font-weight:600; color:var(--text); margin-bottom:3px; }
-  .notif-text .nsub   { font-size:12px; color:var(--text-muted); line-height:1.5; }
-  .nperm {
-    display:inline-flex; align-items:center; gap:5px;
-    font-size:11px; font-weight:600; text-transform:uppercase;
-    letter-spacing:0.08em; margin-top:6px;
-    padding:3px 8px; border-radius:10px;
-  }
-  .nperm .dot { width:6px; height:6px; border-radius:50%; }
-  .nperm.granted { color:var(--green); background:rgba(16,185,129,0.1); }
-  .nperm.granted .dot { background:var(--green); box-shadow:0 0 5px var(--green); }
-  .nperm.denied  { color:var(--red);   background:rgba(239,68,68,0.1); }
-  .nperm.denied  .dot { background:var(--red); }
-  .nperm.unknown { color:var(--text-muted); background:rgba(255,255,255,0.05); }
-  .nperm.unknown .dot { background:var(--text-muted); }
-
-  .notif-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-  .notif-req-btn {
-    padding:8px 18px; border:none; border-radius:8px;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
-    cursor:pointer; transition:opacity 0.15s;
-  }
-  .notif-req-btn.primary { background:var(--amber); color:#000; }
-  .notif-req-btn.primary:active { opacity:0.8; }
-  .notif-req-btn.secondary {
-    background:var(--surface2); border:1.5px solid var(--border);
-    color:var(--text-dim);
-  }
-  .ios-note {
-    margin-top:10px; padding:10px 12px;
-    background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2);
-    border-radius:8px; font-size:12px; color:var(--text-muted); line-height:1.5;
-  }
+  /* Dismiss overlay */
+  #dismiss-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(10,12,20,0.97); flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 32px; }
+  #dismiss-overlay.active { display: flex; }
+  .dismiss-hour { font-family: 'JetBrains Mono', monospace; font-size: 60px; font-weight: 600; color: var(--amber); letter-spacing: -2px; line-height: 1; }
+  .dismiss-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.14em; }
+  .dismiss-message { font-size: 18px; font-weight: 500; color: var(--text); text-align: center; max-width: 280px; min-height: 24px; }
+  #ring-wrap { position: relative; width: 148px; height: 148px; }
+  #ring-svg { width: 148px; height: 148px; transform: rotate(-90deg); }
+  #ring-track { fill: none; stroke: var(--surface2); stroke-width: 9; }
+  #ring-fill { fill: none; stroke: var(--amber); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.95s linear, stroke 0.4s; }
+  #ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 600; color: var(--text); }
+  #dismiss-btn { width: 100%; max-width: 320px; padding: 22px; background: var(--amber); border: none; border-radius: 18px; font-family: 'Inter', sans-serif; font-size: 19px; font-weight: 700; color: #000; cursor: pointer; letter-spacing: 0.04em; box-shadow: 0 0 48px rgba(245,158,11,0.4); transition: transform 0.1s, box-shadow 0.1s; -webkit-tap-highlight-color: transparent; }
+  #dismiss-btn:active { transform: scale(0.97); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+  .dismiss-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
 
   /* Toast */
-  #toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 24px; padding: 12px 22px;
-    font-size: 13px; color: var(--text);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-    pointer-events: none; z-index: 100; white-space: nowrap;
-  }
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: 24px; padding: 12px 22px; font-size: 13px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: 300; white-space: nowrap; }
   #toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
@@ -371,7 +244,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.04</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.05</span>
   </div>
 </header>
 
@@ -397,13 +270,19 @@
   <div class="next-countdown" id="next-countdown">—</div>
 </div>
 
+<!-- Message box -->
+<div class="message-card">
+  <label for="chime-message">💬</label>
+  <input type="text" id="chime-message" class="message-input" placeholder="Optional reminder message…" maxlength="80">
+</div>
+
 <!-- Arc clock -->
 <div class="arc-card">
   <div class="arc-title">Scheduled Hours (24h view)</div>
   <svg id="arc-svg" viewBox="0 0 220 220"></svg>
 </div>
 
-<!-- Missed alarms (shown only when there are misses) -->
+<!-- Missed alarms -->
 <div class="section" id="missed-section" style="display:none;">
   <div class="section-header">⚠️ Missed Alarms</div>
   <div class="section-body">
@@ -416,6 +295,7 @@
 <div class="tabs">
   <button class="tab active" data-tab="schedule">Schedule</button>
   <button class="tab" data-tab="sound">Sound</button>
+  <button class="tab" data-tab="more">More</button>
 </div>
 
 <!-- Schedule tab -->
@@ -432,7 +312,6 @@
       </div>
     </div>
   </div>
-
   <div class="section">
     <div class="section-header">Days</div>
     <div class="section-body">
@@ -452,7 +331,6 @@
       </div>
     </div>
   </div>
-
   <div class="section">
     <div class="section-header">Hours to Chime</div>
     <div class="section-body">
@@ -472,31 +350,27 @@
   <div class="section" style="margin-top:14px">
     <div class="section-header">Chime Sound</div>
     <div class="section-body">
-      <div class="chime-grid" id="chime-grid">
-        <button class="chime-btn selected" data-chime="bell">
-          <span class="icon">🔔</span><span class="label">Bell</span>
-        </button>
-        <button class="chime-btn" data-chime="cuckoo">
-          <span class="icon">🕐</span><span class="label">Cuckoo Clock</span>
-        </button>
-        <button class="chime-btn" data-chime="digital">
-          <span class="icon">📟</span><span class="label">Digital Beep</span>
-        </button>
-        <button class="chime-btn" data-chime="chime">
-          <span class="icon">🎵</span><span class="label">Westminster</span>
-        </button>
-        <button class="chime-btn" data-chime="soft">
-          <span class="icon">🌙</span><span class="label">Soft Tone</span>
-        </button>
-        <button class="chime-btn" data-chime="vibrate">
+      <!-- Dropdown -->
+      <div class="sound-select-wrap">
+        <select class="sound-select" id="sound-select"></select>
+        <span class="sound-select-arrow">▾</span>
+      </div>
+      <!-- Last 4 recents -->
+      <div class="recents-label">Recent</div>
+      <div class="recents-grid" id="recents-grid"></div>
+      <!-- Vibrate toggles -->
+      <div class="vibrate-row">
+        <button class="vib-btn" id="vib-only-btn" onclick="toggleVibrateOnly()">
           <span class="icon">📳</span><span class="label">Vibrate Only</span>
+        </button>
+        <button class="vib-btn" id="vib-also-btn" onclick="toggleVibrateAlso()">
+          <span class="icon">📳</span><span class="label">Also Vibrate</span>
         </button>
       </div>
       <button class="action-btn" onclick="testChime()">▶ Test Selected Chime</button>
       <button class="action-btn" style="border-color:#475569" onclick="scheduleTestFire()">⏱ Fire at Next :00 (verify timing)</button>
     </div>
   </div>
-
   <div class="section">
     <div class="section-header">Volume</div>
     <div class="section-body">
@@ -507,11 +381,14 @@
       </div>
     </div>
   </div>
+</div>
 
-  <div class="section">
+<!-- More (Additional Settings) tab -->
+<div class="tab-panel" id="tab-more">
+  <div class="section" style="margin-top:14px">
     <div class="section-header">Dismiss Timeout</div>
     <div class="section-body">
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Chime repeats until dismissed or timeout expires</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">Chime repeats until dismissed or timeout expires</div>
       <div class="timeout-chips" id="timeout-chips">
         <button class="timeout-chip" data-sec="10">10s</button>
         <button class="timeout-chip selected" data-sec="15">15s</button>
@@ -537,7 +414,7 @@
         <div class="notif-icon-wrap">🔔</div>
         <div class="notif-text">
           <div class="ntitle">Chime Notifications</div>
-          <div class="nsub">Show a system notification when a chime fires. Tap it to bring the app to the foreground, or use the Dismiss action to stop the chime without opening the app.</div>
+          <div class="nsub">Show a system notification when a chime fires. Tap it to bring the app to the foreground, or use Dismiss to stop the chime without opening the app.</div>
           <div class="nperm unknown" id="nperm-badge"><span class="dot"></span><span id="nperm-text">Checking…</span></div>
         </div>
       </div>
@@ -547,12 +424,13 @@
       </div>
     </div>
   </div>
+</div>
 
-</div><!-- end sound tab -->
+<!-- Dismiss overlay -->
 <div id="dismiss-overlay">
   <div class="dismiss-hour" id="dismiss-hour-text">12:00</div>
   <div class="dismiss-label">Hourly Chime</div>
-
+  <div class="dismiss-message" id="dismiss-message"></div>
   <div id="ring-wrap">
     <svg id="ring-svg" viewBox="0 0 148 148">
       <circle id="ring-track" cx="74" cy="74" r="62"/>
@@ -560,7 +438,6 @@
     </svg>
     <div id="ring-num">15</div>
   </div>
-
   <button id="dismiss-btn" onclick="dismissChime()">TAP TO DISMISS</button>
   <div class="dismiss-hint" id="dismiss-hint">Chime will stop automatically when timer expires</div>
 </div>
@@ -568,16 +445,34 @@
 <div id="toast"></div>
 
 <script>
+// ── Sound definitions ──
+const SOUNDS = [
+  { id:'bell',        label:'Bell',            icon:'🔔' },
+  { id:'westminster', label:'Westminster',      icon:'🎵' },
+  { id:'cuckoo',      label:'Cuckoo Clock',     icon:'🕐' },
+  { id:'digital',     label:'Digital Beep',     icon:'📟' },
+  { id:'soft',        label:'Soft Tone',        icon:'🌙' },
+  { id:'chime3',      label:'Triple Chime',     icon:'🎶' },
+  { id:'marimba',     label:'Marimba',          icon:'🎹' },
+  { id:'harp',        label:'Harp Gliss',       icon:'🪄' },
+  { id:'ship',        label:'Ship Bell',        icon:'⚓' },
+  { id:'doorbell',    label:'Doorbell',         icon:'🚪' },
+  { id:'ding',        label:'Simple Ding',      icon:'✨' },
+  { id:'alarm',       label:'Classic Alarm',    icon:'⏰' },
+];
+
 // ── State ──
 const state = {
   enabled: false,
   hours: new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]),
   days: new Set([0,1,2,3,4,5,6]),
-  startHour: 8,
-  endHour: 22,
+  startHour: 8, endHour: 22,
   chime: 'bell',
   volume: 0.7,
   dismissTimeout: 15,
+  vibrateOnly: false,
+  vibrateAlso: false,
+  recentSounds: ['bell','westminster','soft','digital'],
 };
 
 let missedAlarms = [];
@@ -594,650 +489,485 @@ async function resumeAudio() {
   return ctx;
 }
 
-// ── Single chime play, returns duration in seconds ──
+// ── Synth engine ──
 async function playChimeOnce(type) {
-  if (type === 'vibrate') {
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+  if (type === 'vibrate' || state.vibrateOnly) {
+    if (navigator.vibrate) navigator.vibrate([200,100,200,100,200]);
     return 0.7;
   }
+  if (state.vibrateAlso && navigator.vibrate) navigator.vibrate([100,50,100]);
+
   const ctx = await resumeAudio();
   const vol = state.volume;
   const t0 = ctx.currentTime;
 
-  if (type === 'bell') {
-    [[440,1.0],[880,0.4],[1320,0.2],[1760,0.1]].forEach(([freq,amp]) => {
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t0);
-      g.gain.setValueAtTime(amp*vol*0.4, t0);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0+3.0);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t0); osc.stop(t0+3.1);
-    });
-    return 3.2;
+  const osc = (freq, type, start, dur, gainPeak, gainEnd=0.0001) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(gainPeak * vol, start);
+    g.gain.exponentialRampToValueAtTime(gainEnd, start + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(start); o.stop(start + dur + 0.01);
+  };
+
+  switch(type) {
+    case 'bell':
+      [[440,1.0],[880,0.4],[1320,0.2],[1760,0.1]].forEach(([f,a]) => osc(f,'sine',t0,3.0,a*0.4));
+      return 3.2;
+
+    case 'westminster':
+      [330,262,294,196].forEach((f,i) => osc(f,'sine',t0+i*0.38,0.8,0.45));
+      return 2.2;
+
+    case 'cuckoo':
+      [0,0.45].forEach((off,i) => osc(i===0?660:524,'triangle',t0+off,0.35,0.5));
+      return 1.0;
+
+    case 'digital':
+      [0,0.2].forEach(off => osc(880,'square',t0+off,0.14,0.25,0.01));
+      return 0.6;
+
+    case 'soft':
+      { const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(528,t0);
+        g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol*0.4,t0+0.3);
+        g.gain.setValueAtTime(vol*0.4,t0+0.9); g.gain.exponentialRampToValueAtTime(0.0001,t0+2.5);
+        o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0+2.6); }
+      return 2.7;
+
+    case 'chime3':
+      [523,659,784].forEach((f,i) => osc(f,'sine',t0+i*0.3,0.8,0.4));
+      return 1.8;
+
+    case 'marimba':
+      [523,659,784,1047].forEach((f,i) => {
+        const t=t0+i*0.22;
+        osc(f,'sine',t,0.6,0.5); osc(f*2,'sine',t,0.3,0.15);
+      });
+      return 1.4;
+
+    case 'harp':
+      [523,587,659,698,784,880].forEach((f,i) => osc(f,'sine',t0+i*0.1,1.2,0.3));
+      return 1.8;
+
+    case 'ship':
+      { osc(220,'sine',t0,2.0,0.5); osc(330,'sine',t0,2.0,0.2); }
+      return 2.2;
+
+    case 'doorbell':
+      [587,494].forEach((f,i) => osc(f,'sine',t0+i*0.35,0.5,0.45));
+      return 1.2;
+
+    case 'ding':
+      osc(1047,'sine',t0,1.5,0.5); osc(2093,'sine',t0,0.8,0.15);
+      return 1.6;
+
+    case 'alarm':
+      for(let i=0;i<4;i++) osc(880,'square',t0+i*0.25,0.2,0.3,0.01);
+      return 1.2;
+
+    default:
+      osc(440,'sine',t0,1.5,0.4);
+      return 1.6;
   }
-  if (type === 'cuckoo') {
-    [0, 0.45].forEach((offset, i) => {
-      const t = t0 + offset;
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = 'triangle'; osc.frequency.setValueAtTime(i===0?660:524, t);
-      g.gain.setValueAtTime(vol*0.5, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t+0.35);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t); osc.stop(t+0.36);
-    });
-    return 1.0;
-  }
-  if (type === 'digital') {
-    [0, 0.2].forEach(offset => {
-      const t = t0 + offset;
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = 'square'; osc.frequency.setValueAtTime(880, t);
-      g.gain.setValueAtTime(vol*0.25, t);
-      g.gain.setValueAtTime(vol*0.25, t+0.12);
-      g.gain.linearRampToValueAtTime(0, t+0.14);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t); osc.stop(t+0.15);
-    });
-    return 0.6;
-  }
-  if (type === 'chime') {
-    [330,262,294,196].forEach((freq, i) => {
-      const t = t0 + i*0.38;
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
-      g.gain.setValueAtTime(vol*0.45, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t+0.8);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t); osc.stop(t+0.85);
-    });
-    return 2.2;
-  }
-  if (type === 'soft') {
-    const osc = ctx.createOscillator(), g = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(528, t0);
-    g.gain.setValueAtTime(0, t0);
-    g.gain.linearRampToValueAtTime(vol*0.4, t0+0.3);
-    g.gain.setValueAtTime(vol*0.4, t0+0.9);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0+2.5);
-    osc.connect(g); g.connect(ctx.destination);
-    osc.start(t0); osc.stop(t0+2.6);
-    return 2.7;
-  }
-  return 1.0;
 }
 
-// ── Repeating chime loop ──
-let loopActive = false;
-let loopTimer = null;
-
+// ── Chime loop ──
+let loopActive=false, loopTimer=null;
 async function startChimeLoop(type) {
-  loopActive = true;
-  const run = async () => {
-    if (!loopActive) return;
-    const dur = await playChimeOnce(type);
-    const pause = type === 'vibrate' ? 800 : Math.max(400, dur * 200);
-    loopTimer = setTimeout(run, dur * 1000 + pause);
+  loopActive=true;
+  const run=async()=>{
+    if(!loopActive)return;
+    const dur=await playChimeOnce(type);
+    loopTimer=setTimeout(run,(dur+0.5)*1000);
   };
   run();
 }
-
-function stopChimeLoop() {
-  loopActive = false;
-  clearTimeout(loopTimer);
-  loopTimer = null;
-}
+function stopChimeLoop() { loopActive=false; clearTimeout(loopTimer); loopTimer=null; }
 
 // ── Dismiss overlay ──
-const CIRC = 2 * Math.PI * 62; // r=62
-let dismissTimer = null;
-let dismissInterval = null;
-let activeAlarmHour = null;
+const CIRC=2*Math.PI*62;
+let dismissTimer=null, dismissInterval=null, activeAlarmHour=null;
 
 function showDismissOverlay(h) {
-  activeAlarmHour = h;
-  document.getElementById('dismiss-hour-text').textContent = formatHour(h);
+  activeAlarmHour=h;
+  document.getElementById('dismiss-hour-text').textContent=formatHour(h);
+  const msg=document.getElementById('chime-message').value.trim();
+  document.getElementById('dismiss-message').textContent=msg;
   document.getElementById('dismiss-overlay').classList.add('active');
 
-  const fill = document.getElementById('ring-fill');
-  const numEl = document.getElementById('ring-num');
-  const hint = document.getElementById('dismiss-hint');
-  fill.style.strokeDasharray = CIRC;
+  const fill=document.getElementById('ring-fill');
+  const numEl=document.getElementById('ring-num');
+  const hint=document.getElementById('dismiss-hint');
+  fill.style.strokeDasharray=CIRC;
+  const timeout=state.dismissTimeout;
 
-  const timeout = state.dismissTimeout;
-
-  if (timeout === 0) {
-    fill.style.strokeDashoffset = 0;
-    fill.style.stroke = 'var(--amber)';
-    numEl.textContent = '∞';
-    numEl.style.fontSize = '30px';
-    hint.textContent = 'Tap to dismiss — chime runs until you do';
-    return;
+  if(timeout===0){
+    fill.style.strokeDashoffset=0; fill.style.stroke='var(--amber)';
+    numEl.textContent='∞'; numEl.style.fontSize='30px';
+    hint.textContent='Tap to dismiss — chime runs until you do'; return;
   }
 
-  numEl.style.fontSize = '38px';
-  let remaining = timeout;
-
-  const update = () => {
-    const frac = remaining / timeout;
-    fill.style.strokeDashoffset = CIRC * (1 - frac);
-    fill.style.stroke = frac > 0.4 ? 'var(--amber)' : frac > 0.18 ? '#f97316' : 'var(--red)';
-    numEl.textContent = remaining;
-    hint.textContent = `Auto-dismissing in ${remaining}s — tap to dismiss now`;
+  numEl.style.fontSize='38px';
+  let remaining=timeout;
+  const update=()=>{
+    const frac=remaining/timeout;
+    fill.style.strokeDashoffset=CIRC*(1-frac);
+    fill.style.stroke=frac>0.4?'var(--amber)':frac>0.18?'#f97316':'var(--red)';
+    numEl.textContent=remaining;
+    hint.textContent=`Auto-dismissing in ${remaining}s — tap to dismiss now`;
   };
-
   update();
-  dismissInterval = setInterval(() => {
-    remaining = Math.max(0, remaining - 1);
-    update();
-  }, 1000);
-
-  dismissTimer = setTimeout(() => missChime(h), timeout * 1000);
+  dismissInterval=setInterval(()=>{ remaining=Math.max(0,remaining-1); update(); },1000);
+  dismissTimer=setTimeout(()=>missChime(h),timeout*1000);
 }
 
 function dismissChime() {
-  stopChimeLoop();
-  clearTimeout(dismissTimer);
-  clearInterval(dismissInterval);
+  stopChimeLoop(); clearTimeout(dismissTimer); clearInterval(dismissInterval);
   document.getElementById('dismiss-overlay').classList.remove('active');
-  closeActiveNotif();
-  activeAlarmHour = null;
+  closeActiveNotif(); activeAlarmHour=null;
 }
-
 function missChime(h) {
-  stopChimeLoop();
-  clearInterval(dismissInterval);
+  stopChimeLoop(); clearInterval(dismissInterval);
   document.getElementById('dismiss-overlay').classList.remove('active');
   closeActiveNotif();
-  missedAlarms.unshift({ hour: h, ts: new Date() });
-  renderMissed();
-  activeAlarmHour = null;
+  missedAlarms.unshift({hour:h,ts:new Date()});
+  renderMissed(); activeAlarmHour=null;
 }
 
 // ── Missed alarms ──
 function renderMissed() {
-  const section = document.getElementById('missed-section');
-  const list = document.getElementById('missed-list');
-  if (missedAlarms.length === 0) { section.style.display = 'none'; return; }
-  section.style.display = '';
-  list.innerHTML = '';
-  missedAlarms.forEach(m => {
-    const timeStr = m.ts.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    const dateStr = m.ts.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
-    const item = document.createElement('div');
-    item.className = 'missed-item';
-    item.innerHTML = `
-      <span class="missed-icon">🔕</span>
-      <div class="missed-text">
-        <div class="missed-time">Missed: ${formatHour(m.hour)}</div>
-        <div class="missed-sub">Timed out at ${timeStr} · ${dateStr}</div>
-      </div>`;
+  const section=document.getElementById('missed-section');
+  const list=document.getElementById('missed-list');
+  if(!missedAlarms.length){section.style.display='none';return;}
+  section.style.display='';
+  list.innerHTML='';
+  missedAlarms.forEach(m=>{
+    const ts=m.ts.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const ds=m.ts.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+    const item=document.createElement('div'); item.className='missed-item';
+    item.innerHTML=`<span class="missed-icon">🔕</span><div class="missed-text"><div class="missed-time">Missed: ${formatHour(m.hour)}</div><div class="missed-sub">Timed out at ${ts} · ${ds}</div></div>`;
     list.appendChild(item);
   });
 }
-
-function clearMissed() { missedAlarms = []; renderMissed(); }
+function clearMissed(){missedAlarms=[];renderMissed();}
 
 // ── Trigger ──
 async function triggerChime(h) {
   await resumeAudio();
-  startChimeLoop(state.chime);
+  startChimeLoop(state.vibrateOnly?'vibrate':state.chime);
   showDismissOverlay(h);
   showChimeNotification(h);
 }
 
 // ── Clock ──
-function formatTime(d) {
-  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
-}
-function formatHour(h) {
-  const ap = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:00 ${ap}`;
-}
+function formatTime(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
+function formatHour(h){const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return `${h12}:00 ${ap}`;}
 
-let lastCheckedHour = -1;
-let testNextMinute = false;
-
+let lastCheckedHour=-1, testNextMinute=false;
 function tick() {
-  const now = new Date();
-  document.getElementById('live-clock').textContent = formatTime(now);
-  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-
-  if (testNextMinute && s < 5) {
-    testNextMinute = false;
-    triggerChime(h);
-  }
-
-  if (m === 0 && s < 5 && h !== lastCheckedHour) {
-    lastCheckedHour = h;
-    if (shouldChimeAt(h, now.getDay())) triggerChime(h);
-  } else if (m !== 0) {
-    lastCheckedHour = -1;
-  }
-
+  const now=new Date();
+  document.getElementById('live-clock').textContent=formatTime(now);
+  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  if(testNextMinute&&s<5){testNextMinute=false;triggerChime(h);}
+  if(m===0&&s<5&&h!==lastCheckedHour){
+    lastCheckedHour=h;
+    if(shouldChimeAt(h,now.getDay()))triggerChime(h);
+  } else if(m!==0){lastCheckedHour=-1;}
   updateNextChime(now);
 }
-
-function shouldChimeAt(h, day) {
-  if (!state.enabled) return false;
-  if (!state.hours.has(h)) return false;
-  if (!state.days.has(day)) return false;
-  if (h < state.startHour || h >= state.endHour) return false;
+function shouldChimeAt(h,day){
+  if(!state.enabled)return false;
+  if(!state.hours.has(h))return false;
+  if(!state.days.has(day))return false;
+  if(h<state.startHour||h>=state.endHour)return false;
   return true;
 }
-
-function updateNextChime(now) {
-  if (!state.enabled) {
-    document.getElementById('next-time').textContent = '——';
-    document.getElementById('next-countdown').textContent = 'Chime disabled';
-    return;
-  }
-  for (let delta = 1; delta <= 24; delta++) {
-    const t = new Date(now);
-    t.setMinutes(0, 0, 0);
-    t.setHours(now.getHours() + delta);
-    const h = t.getHours(), day = t.getDay();
-    if (shouldChimeAt(h, day)) {
-      const diff = t - now;
-      const mins = Math.floor(diff / 60000);
-      const hrs = Math.floor(mins / 60), rem = mins % 60;
-      document.getElementById('next-time').textContent = formatHour(h);
-      document.getElementById('next-countdown').textContent =
-        hrs > 0 ? `in ${hrs}h ${rem}m` : `in ${mins}m`;
+function updateNextChime(now){
+  if(!state.enabled){document.getElementById('next-time').textContent='——';document.getElementById('next-countdown').textContent='Chime disabled';return;}
+  for(let d=1;d<=24;d++){
+    const t=new Date(now); t.setMinutes(0,0,0); t.setHours(now.getHours()+d);
+    const h=t.getHours(),day=t.getDay();
+    if(shouldChimeAt(h,day)){
+      const diff=t-now,mins=Math.floor(diff/60000),hrs=Math.floor(mins/60),rem=mins%60;
+      document.getElementById('next-time').textContent=formatHour(h);
+      document.getElementById('next-countdown').textContent=hrs>0?`in ${hrs}h ${rem}m`:`in ${mins}m`;
       return;
     }
   }
-  document.getElementById('next-time').textContent = '——';
-  document.getElementById('next-countdown').textContent = 'No hours scheduled';
+  document.getElementById('next-time').textContent='——';
+  document.getElementById('next-countdown').textContent='No hours scheduled';
 }
 
 // ── Arc SVG ──
-function buildArc() {
-  const svg = document.getElementById('arc-svg');
-  svg.innerHTML = '';
-  const cx=110, cy=110, r=90, ir=58, total=24, gap=2.5;
-  const dpH = 360/total;
-
-  const numActive = [...state.hours].filter(h => h >= state.startHour && h < state.endHour).length;
-
-  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-  txt.setAttribute('x',cx); txt.setAttribute('y',cy-6); txt.setAttribute('text-anchor','middle');
-  txt.setAttribute('fill','#e2e8f0'); txt.setAttribute('font-family','JetBrains Mono,monospace');
-  txt.setAttribute('font-size','28'); txt.setAttribute('font-weight','600');
-  txt.textContent = numActive; svg.appendChild(txt);
-
-  const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
-  sub.setAttribute('x',cx); sub.setAttribute('y',cy+16); sub.setAttribute('text-anchor','middle');
-  sub.setAttribute('fill','#64748b'); sub.setAttribute('font-family','Inter,sans-serif');
-  sub.setAttribute('font-size','11'); sub.textContent='hours active'; svg.appendChild(sub);
-
-  for (let h=0; h<24; h++) {
-    const s0=(h*dpH-90+gap/2)*Math.PI/180, s1=(h*dpH-90+dpH-gap/2)*Math.PI/180;
-    const x1=cx+r*Math.cos(s0), y1=cy+r*Math.sin(s0);
-    const x2=cx+r*Math.cos(s1), y2=cy+r*Math.sin(s1);
-    const x3=cx+ir*Math.cos(s1),y3=cy+ir*Math.sin(s1);
-    const x4=cx+ir*Math.cos(s0),y4=cy+ir*Math.sin(s0);
-    const inWin = h >= state.startHour && h < state.endHour;
-    const active = state.hours.has(h) && inWin && state.enabled;
-    const sched  = state.hours.has(h) && inWin;
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d', `M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 0 0 ${x4} ${y4}Z`);
-    path.setAttribute('fill', active?'#f59e0b':sched?'rgba(245,158,11,0.25)':'#1e2535');
-    path.setAttribute('stroke','#0f1117'); path.setAttribute('stroke-width','1');
+function buildArc(){
+  const svg=document.getElementById('arc-svg'); svg.innerHTML='';
+  const cx=110,cy=110,r=90,ir=58,total=24,gap=2.5,dpH=360/total;
+  const numActive=[...state.hours].filter(h=>h>=state.startHour&&h<state.endHour).length;
+  const mk=(tag,attrs)=>{const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
+  svg.appendChild(Object.assign(mk('text',{x:cx,y:cy-6,'text-anchor':'middle',fill:'#e2e8f0','font-family':'JetBrains Mono,monospace','font-size':'28','font-weight':'600'}),{textContent:numActive}));
+  svg.appendChild(Object.assign(mk('text',{x:cx,y:cy+16,'text-anchor':'middle',fill:'#64748b','font-family':'Inter,sans-serif','font-size':'11'}),{textContent:'hours active'}));
+  for(let h=0;h<24;h++){
+    const s0=(h*dpH-90+gap/2)*Math.PI/180,s1=(h*dpH-90+dpH-gap/2)*Math.PI/180;
+    const x1=cx+r*Math.cos(s0),y1=cy+r*Math.sin(s0),x2=cx+r*Math.cos(s1),y2=cy+r*Math.sin(s1);
+    const x3=cx+ir*Math.cos(s1),y3=cy+ir*Math.sin(s1),x4=cx+ir*Math.cos(s0),y4=cy+ir*Math.sin(s0);
+    const inWin=h>=state.startHour&&h<state.endHour;
+    const active=state.hours.has(h)&&inWin&&state.enabled,sched=state.hours.has(h)&&inWin;
+    const path=mk('path',{d:`M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 0 0 ${x4} ${y4}Z`,fill:active?'#f59e0b':sched?'rgba(245,158,11,0.25)':'#1e2535',stroke:'#0f1117','stroke-width':'1'});
     svg.appendChild(path);
-
-    if (h%6===0) {
-      const midA=((h*dpH-90+dpH/2))*Math.PI/180, lr=r+13;
-      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
-      lbl.setAttribute('x',cx+lr*Math.cos(midA)); lbl.setAttribute('y',cy+lr*Math.sin(midA)+4);
-      lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('fill','#64748b');
-      lbl.setAttribute('font-family','JetBrains Mono,monospace'); lbl.setAttribute('font-size','9');
-      lbl.textContent=h===0?'12a':h===6?'6a':h===12?'12p':'6p';
-      svg.appendChild(lbl);
+    if(h%6===0){
+      const midA=(h*dpH-90+dpH/2)*Math.PI/180,lr=r+13;
+      const lbl=mk('text',{x:cx+lr*Math.cos(midA),y:cy+lr*Math.sin(midA)+4,'text-anchor':'middle',fill:'#64748b','font-family':'JetBrains Mono,monospace','font-size':'9'});
+      lbl.textContent=h===0?'12a':h===6?'6a':h===12?'12p':'6p'; svg.appendChild(lbl);
     }
   }
 }
 
 // ── Hour grid ──
-function buildHourGrid() {
-  const grid = document.getElementById('hour-grid');
-  grid.innerHTML = '';
-  for (let h=0; h<24; h++) {
-    const inWin = h >= state.startHour && h < state.endHour;
-    const cell = document.createElement('button');
-    cell.className = 'hour-cell' + (state.hours.has(h)?' active':'') + (inWin?'':' disabled');
-    cell.textContent = h.toString().padStart(2,'0');
-    cell.addEventListener('click', () => {
-      if (!inWin) { showToast('Outside active window'); return; }
-      state.hours.has(h) ? state.hours.delete(h) : state.hours.add(h);
-      buildHourGrid(); buildArc();
+function buildHourGrid(){
+  const grid=document.getElementById('hour-grid'); grid.innerHTML='';
+  for(let h=0;h<24;h++){
+    const inWin=h>=state.startHour&&h<state.endHour;
+    const cell=document.createElement('button');
+    cell.className='hour-cell'+(state.hours.has(h)?' active':'')+(inWin?'':' disabled');
+    cell.textContent=h.toString().padStart(2,'0');
+    cell.addEventListener('click',()=>{
+      if(!inWin){showToast('Outside active window');return;}
+      state.hours.has(h)?state.hours.delete(h):state.hours.add(h);
+      buildHourGrid();buildArc();
     });
     grid.appendChild(cell);
   }
 }
-
-function applyHourPreset(type) {
+function applyHourPreset(type){
   state.hours.clear();
-  for (let h=0; h<24; h++) {
-    const inWin = h >= state.startHour && h < state.endHour;
-    if (!inWin) continue;
-    if (type==='all') state.hours.add(h);
-    else if (type==='even' && h%2===0) state.hours.add(h);
-    else if (type==='odd'  && h%2!==0) state.hours.add(h);
+  for(let h=0;h<24;h++){
+    const inWin=h>=state.startHour&&h<state.endHour; if(!inWin)continue;
+    if(type==='all')state.hours.add(h);
+    else if(type==='even'&&h%2===0)state.hours.add(h);
+    else if(type==='odd'&&h%2!==0)state.hours.add(h);
   }
-  buildHourGrid(); buildArc();
+  buildHourGrid();buildArc();
 }
 
 // ── Day grid ──
-function buildDayGrid() {
-  document.querySelectorAll('.day-btn').forEach(btn => {
-    const d = parseInt(btn.dataset.day);
-    btn.classList.toggle('active', state.days.has(d));
-    btn.onclick = () => {
-      state.days.has(d) ? state.days.delete(d) : state.days.add(d);
-      buildDayGrid();
-    };
+function buildDayGrid(){
+  document.querySelectorAll('.day-btn').forEach(btn=>{
+    const d=parseInt(btn.dataset.day);
+    btn.classList.toggle('active',state.days.has(d));
+    btn.onclick=()=>{state.days.has(d)?state.days.delete(d):state.days.add(d);buildDayGrid();};
   });
 }
-function setDays(arr) { state.days = new Set(arr); buildDayGrid(); }
+function setDays(arr){state.days=new Set(arr);buildDayGrid();}
+
+// ── Sound dropdown + recents ──
+function buildSoundUI(){
+  // Populate dropdown
+  const sel=document.getElementById('sound-select');
+  sel.innerHTML='';
+  SOUNDS.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s.id; opt.textContent=`${s.icon} ${s.label}`;
+    if(s.id===state.chime)opt.selected=true;
+    sel.appendChild(opt);
+  });
+
+  // Recents grid (last 4)
+  const grid=document.getElementById('recents-grid');
+  grid.innerHTML='';
+  state.recentSounds.slice(0,4).forEach(id=>{
+    const s=SOUNDS.find(x=>x.id===id); if(!s)return;
+    const btn=document.createElement('button');
+    btn.className='recent-btn'+(id===state.chime?' selected':'');
+    btn.innerHTML=`<span class="icon">${s.icon}</span><span class="label">${s.label}</span>`;
+    btn.onclick=()=>selectSound(id);
+    grid.appendChild(btn);
+  });
+
+  // Vibrate buttons
+  document.getElementById('vib-only-btn').classList.toggle('active',state.vibrateOnly);
+  document.getElementById('vib-also-btn').classList.toggle('active',state.vibrateAlso);
+}
+
+function selectSound(id){
+  state.chime=id;
+  // Update recents
+  state.recentSounds=state.recentSounds.filter(x=>x!==id);
+  state.recentSounds.unshift(id);
+  if(state.recentSounds.length>4)state.recentSounds.length=4;
+  buildSoundUI();
+}
+
+function toggleVibrateOnly(){
+  state.vibrateOnly=!state.vibrateOnly;
+  if(state.vibrateOnly)state.vibrateAlso=false;
+  buildSoundUI();
+}
+function toggleVibrateAlso(){
+  state.vibrateAlso=!state.vibrateAlso;
+  if(state.vibrateAlso)state.vibrateOnly=false;
+  buildSoundUI();
+}
+
+document.getElementById('sound-select').addEventListener('change',e=>selectSound(e.target.value));
 
 // ── Time range ──
-document.getElementById('time-start').addEventListener('change', e => {
-  state.startHour = parseInt(e.target.value); buildHourGrid(); buildArc();
-});
-document.getElementById('time-end').addEventListener('change', e => {
-  state.endHour = parseInt(e.target.value); buildHourGrid(); buildArc();
-});
+document.getElementById('time-start').addEventListener('change',e=>{state.startHour=parseInt(e.target.value);buildHourGrid();buildArc();});
+document.getElementById('time-end').addEventListener('change',e=>{state.endHour=parseInt(e.target.value);buildHourGrid();buildArc();});
 
 // ── Master toggle ──
-document.getElementById('master-toggle').addEventListener('change', e => {
-  state.enabled = e.target.checked;
-  document.getElementById('status-dot').classList.toggle('active', state.enabled);
-  document.getElementById('status-text').textContent = state.enabled ? 'Chime Active' : 'Chime Off';
-  document.getElementById('status-sub').textContent  = state.enabled ? 'Chiming at scheduled hours' : 'Enable to activate hourly chimes';
+document.getElementById('master-toggle').addEventListener('change',e=>{
+  state.enabled=e.target.checked;
+  document.getElementById('status-dot').classList.toggle('active',state.enabled);
+  document.getElementById('status-text').textContent=state.enabled?'Chime Active':'Chime Off';
+  document.getElementById('status-sub').textContent=state.enabled?'Chiming at scheduled hours':'Enable to activate hourly chimes';
   buildArc();
-  showToast(state.enabled ? '🔔 Chime enabled' : 'Chime disabled');
-  if (state.enabled) resumeAudio();
-});
-
-// ── Chime selection ──
-document.getElementById('chime-grid').addEventListener('click', e => {
-  const btn = e.target.closest('.chime-btn');
-  if (!btn) return;
-  document.querySelectorAll('.chime-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  state.chime = btn.dataset.chime;
+  showToast(state.enabled?'🔔 Chime enabled':'Chime disabled');
+  if(state.enabled)resumeAudio();
 });
 
 // ── Volume ──
-document.getElementById('volume').addEventListener('input', e => {
-  state.volume = e.target.value / 100;
-  document.getElementById('vol-label').textContent = e.target.value + '%';
-});
+document.getElementById('volume').addEventListener('input',e=>{state.volume=e.target.value/100;document.getElementById('vol-label').textContent=e.target.value+'%';});
 
 // ── Timeout chips ──
-document.getElementById('timeout-chips').addEventListener('click', e => {
-  const chip = e.target.closest('.timeout-chip');
-  if (!chip) return;
-  document.querySelectorAll('.timeout-chip').forEach(c => c.classList.remove('selected'));
-  chip.classList.add('selected');
-  state.dismissTimeout = parseInt(chip.dataset.sec);
+document.getElementById('timeout-chips').addEventListener('click',e=>{
+  const chip=e.target.closest('.timeout-chip'); if(!chip)return;
+  document.querySelectorAll('.timeout-chip').forEach(c=>c.classList.remove('selected'));
+  chip.classList.add('selected'); state.dismissTimeout=parseInt(chip.dataset.sec);
 });
 
 // ── Test ──
-function testChime() { triggerChime(new Date().getHours()); }
-function scheduleTestFire() {
-  testNextMinute = true;
-  const s = 60 - new Date().getSeconds();
-  showToast(`⏱ Will fire in ~${s}s at :00`);
-}
+function testChime(){triggerChime(new Date().getHours());}
+function scheduleTestFire(){testNextMinute=true;const s=60-new Date().getSeconds();showToast(`⏱ Will fire in ~${s}s at :00`);}
 
 // ── Tabs ──
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
   });
 });
 
 // ── Toast ──
 let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
 // ── Notifications ──
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+let swReg=null, swRegError=null, activeNotif=null;
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-let swReg = null;
-let swRegError = null;
-let activeNotif = null;
-let notifEnabled = false;
-
-async function registerSW() {
-  if (!('serviceWorker' in navigator)) return false;
-  try {
-    swReg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-    console.log('SW registered:', swReg);
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data?.type === 'DISMISS_CHIME') dismissChime();
-      if (e.data?.type === 'FOCUS_APP')    showDismissOverlay(activeAlarmHour ?? new Date().getHours());
+async function registerSW(){
+  if(!('serviceWorker'in navigator))return false;
+  try{
+    swReg=await navigator.serviceWorker.register('./sw.js',{scope:'./'});
+    navigator.serviceWorker.addEventListener('message',e=>{
+      if(e.data?.type==='DISMISS_CHIME')dismissChime();
+      if(e.data?.type==='FOCUS_APP')showDismissOverlay(activeAlarmHour??new Date().getHours());
     });
-    renderNotifUI();
-    return true;
-  } catch(err) {
-    console.warn('SW registration failed:', err);
-    swRegError = err.message;
-    renderNotifUI();
-    return false;
+    renderNotifUI(); return true;
+  }catch(err){
+    swRegError=err.message; renderNotifUI(); return false;
   }
 }
 
-async function requestNotifPermission() {
-  if (!('Notification' in window)) return;
-  const result = await Notification.requestPermission();
-  if (result === 'granted') {
-    await registerSW();
-    notifEnabled = true;
-    document.getElementById('notif-toggle').checked = true;
-  }
+async function requestNotifPermission(){
+  if(!('Notification'in window))return;
+  const result=await Notification.requestPermission();
+  if(result==='granted'){await registerSW();document.getElementById('notif-toggle').checked=true;}
   renderNotifUI();
 }
 
-function onNotifToggle(checked) {
-  console.log('onNotifToggle called, checked=', checked);
-  if (!('Notification' in window) || isIOS) {
-    document.getElementById('notif-toggle').checked = false;
-    return;
-  }
-  if (checked && Notification.permission !== 'granted') {
-    document.getElementById('notif-toggle').checked = false;
-    requestNotifPermission();
-    return;
-  }
-  notifEnabled = checked;
-  console.log('notifEnabled set to', notifEnabled);
-  if (checked && !swReg) registerSW();
-  updateDiag();
+function getDiag(){
+  const toggleOn=document.getElementById('notif-toggle')?.checked??false;
+  return [`Permission: ${Notification.permission}`,`SW: ${swReg?'yes':(swRegError?'FAILED':'no')}`,`Notif toggle: ${toggleOn}`,`PWA: ${window.matchMedia('(display-mode: standalone)').matches}`].join(' · ');
 }
+function updateDiag(){const el=document.getElementById('notif-diag');if(el)el.textContent=getDiag();}
 
-function getDiag() {
-  const toggleOn = document.getElementById('notif-toggle')?.checked ?? false;
-  return [
-    `Permission: ${Notification.permission}`,
-    `SW supported: ${'serviceWorker' in navigator}`,
-    `SW registered: ${swReg ? 'yes' : (swRegError ? 'FAILED: ' + swRegError : 'no')}`,
-    `Notifications enabled: ${toggleOn}`,
-    `Standalone PWA: ${window.matchMedia('(display-mode: standalone)').matches}`,
-  ].join(' · ');
-}
-
-function updateDiag() {
-  const el = document.getElementById('notif-diag');
-  if (el) el.textContent = getDiag();
-}
-
-function renderNotifUI() {
-  const badge   = document.getElementById('nperm-badge');
-  const permTxt = document.getElementById('nperm-text');
-  const actions = document.getElementById('notif-actions');
-  const iosNote = document.getElementById('ios-note');
-
-  if (isIOS) {
-    badge.className = 'nperm denied';
-    permTxt.textContent = 'Not supported on iOS';
-    iosNote.style.display = '';
-    document.getElementById('notif-toggle').disabled = true;
-    actions.innerHTML = '';
-    return;
-  }
-
-  if (!('Notification' in window)) {
-    badge.className = 'nperm denied';
-    permTxt.textContent = 'Not supported in this browser';
-    actions.innerHTML = '';
-    return;
-  }
-
-  const perm = Notification.permission;
-
-  if (perm === 'granted') {
-    badge.className = 'nperm granted';
-    permTxt.textContent = 'Permission granted';
-    actions.innerHTML = `
-      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>
-      <button class="notif-req-btn secondary" onclick="testNotification()">Send Test Notification</button>`;
-  } else if (perm === 'denied') {
-    badge.className = 'nperm denied';
-    permTxt.textContent = 'Permission denied';
-    actions.innerHTML = `
-      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Go to Android Settings → Apps → Chrome → Notifications, and make sure notifications are allowed. Then reload the app.</p>`;
-    document.getElementById('notif-toggle').disabled = true;
-  } else {
-    badge.className = 'nperm unknown';
-    permTxt.textContent = 'Permission not yet granted';
-    actions.innerHTML = `
-      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>`;
-    const btn = document.createElement('button');
-    btn.className = 'notif-req-btn primary';
-    btn.textContent = 'Enable Notifications';
-    btn.onclick = requestNotifPermission;
-    actions.appendChild(btn);
+function renderNotifUI(){
+  const badge=document.getElementById('nperm-badge');
+  const permTxt=document.getElementById('nperm-text');
+  const actions=document.getElementById('notif-actions');
+  const iosNote=document.getElementById('ios-note');
+  if(isIOS){badge.className='nperm denied';permTxt.textContent='Not supported on iOS';iosNote.style.display='';document.getElementById('notif-toggle').disabled=true;actions.innerHTML='';return;}
+  if(!('Notification'in window)){badge.className='nperm denied';permTxt.textContent='Not supported in this browser';actions.innerHTML='';return;}
+  const perm=Notification.permission;
+  if(perm==='granted'){
+    badge.className='nperm granted';permTxt.textContent='Permission granted';
+    actions.innerHTML=`<div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div><button class="notif-req-btn secondary" onclick="testNotification()">Send Test Notification</button>`;
+  }else if(perm==='denied'){
+    badge.className='nperm denied';permTxt.textContent='Permission denied';
+    actions.innerHTML=`<div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6">${getDiag()}</div><p style="font-size:12px;color:var(--text-muted);margin-top:6px">Go to Android Settings → Apps → Chime → Notifications and enable them, then reload.</p>`;
+    document.getElementById('notif-toggle').disabled=true;
+  }else{
+    badge.className='nperm unknown';permTxt.textContent='Permission not yet granted';
+    actions.innerHTML=`<div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6">${getDiag()}</div>`;
+    const btn=document.createElement('button'); btn.className='notif-req-btn primary'; btn.textContent='Enable Notifications'; btn.onclick=requestNotifPermission; actions.appendChild(btn);
   }
 }
 
-// --- Show a notification when a chime fires ---
-async function showChimeNotification(h) {
-  const toggleOn = document.getElementById('notif-toggle')?.checked;
-  if (!toggleOn) return;
-  if (Notification.permission !== 'granted') return;
-
-  const title = `⏰ ${formatHour(h)} — Hourly Chime`;
-  const opts = {
-    body: 'Tap to open the app, or use Dismiss to stop the chime.',
-    tag: 'hourly-chime',
-    renotify: true,
-    requireInteraction: true,
-    actions: [{ action: 'dismiss', title: 'Dismiss' }],
-    vibrate: [200, 100, 200],
-  };
-
-  try {
-    if (swReg) {
-      await swReg.showNotification(title, opts);
-    } else {
-      // Fallback: plain Notification (no actions, but click still works)
+async function showChimeNotification(h){
+  const toggleOn=document.getElementById('notif-toggle')?.checked;
+  if(!toggleOn)return;
+  if(Notification.permission!=='granted')return;
+  const msg=document.getElementById('chime-message').value.trim();
+  const title=`⏰ ${formatHour(h)} — Hourly Chime`;
+  const body=msg?`${msg}\nTap to open · Dismiss to stop`:' Tap to open the app, or Dismiss to stop the chime.';
+  const opts={body,tag:'hourly-chime',renotify:true,requireInteraction:true,actions:[{action:'dismiss',title:'Dismiss'}],vibrate:[200,100,200]};
+  try{
+    if(swReg)await swReg.showNotification(title,opts);
+    else{
       closeActiveNotif();
-      const n = new Notification(title, { body: opts.body, icon: opts.icon, tag: opts.tag, requireInteraction: true, silent: true });
-      n.onclick = () => { n.close(); window.focus(); showDismissOverlay(h); };
-      n.onclose = () => { dismissChime(); };
-      activeNotif = n;
+      const n=new Notification(title,{body,requireInteraction:true});
+      n.onclick=()=>{n.close();window.focus();showDismissOverlay(h);};
+      n.onclose=()=>dismissChime(); activeNotif=n;
     }
-  } catch(err) {
-    console.warn('Notification failed:', err);
+  }catch(err){console.warn('Notification error:',err);}
+}
+
+function closeActiveNotif(){
+  if(activeNotif){activeNotif.close();activeNotif=null;}
+  if(swReg)swReg.getNotifications({tag:'hourly-chime'}).then(ns=>ns.forEach(n=>n.close()));
+}
+
+async function testNotification(){
+  if(Notification.permission!=='granted'){showToast('Permission not granted');return;}
+  const h=new Date().getHours();
+  const msg=document.getElementById('chime-message').value.trim();
+  const title=`⏰ ${formatHour(h)} — Test Notification`;
+  const body=msg?`${msg}\nNotifications are working!`:'Notifications are working! Tap Dismiss to test.';
+  try{
+    if(swReg){await swReg.showNotification(title,{body,tag:'hourly-chime-test',requireInteraction:true,actions:[{action:'dismiss',title:'Dismiss'}]});showToast('✓ Sent — check shade');}
+    else{new Notification(title,{body});showToast('✓ Sent — check shade');}
+  }catch(err){showToast('Error: '+err.message);}
+}
+
+// Delegation for notif toggle
+document.addEventListener('change',e=>{
+  if(e.target.id==='notif-toggle'){
+    const checked=e.target.checked;
+    if(!('Notification'in window)||isIOS){e.target.checked=false;return;}
+    if(checked&&Notification.permission!=='granted'){e.target.checked=false;requestNotifPermission();return;}
+    if(checked&&!swReg)registerSW();
+    updateDiag();
   }
-}
-
-function closeActiveNotif() {
-  if (activeNotif) { activeNotif.close(); activeNotif = null; }
-  if (swReg) swReg.getNotifications({ tag: 'hourly-chime' }).then(ns => ns.forEach(n => n.close()));
-}
-
-async function testNotification() {
-  const steps = [];
-  try {
-    // Step 1: permission
-    steps.push(`1. Permission: ${Notification.permission}`);
-    if (Notification.permission !== 'granted') {
-      showToast('❌ Permission not granted'); return;
-    }
-
-    // Step 2: SW
-    steps.push(`2. swReg: ${swReg ? 'yes' : 'no'}`);
-
-    // Step 3: toggle
-    const toggleOn = document.getElementById('notif-toggle')?.checked;
-    steps.push(`3. Toggle: ${toggleOn}`);
-
-    // Step 4: try sending
-    if (swReg) {
-      steps.push('4. Trying SW.showNotification...');
-      await swReg.showNotification('⏰ Test — Hourly Chime', {
-        body: 'Notifications are working!',
-        tag: 'hourly-chime-test',
-        requireInteraction: false,
-        silent: false,
-        actions: [{ action: 'dismiss', title: 'Dismiss' }],
-      });
-      steps.push('5. SW.showNotification() resolved OK');
-      showToast('✓ Sent — check notification shade');
-    } else {
-      steps.push('4. No SW — trying Notification API...');
-      new Notification('⏰ Test — Hourly Chime', { body: 'Notifications are working!' });
-      steps.push('5. Notification() created OK');
-      showToast('✓ Sent via API — check shade');
-    }
-  } catch(err) {
-    steps.push(`ERROR: ${err.name}: ${err.message}`);
-    showToast('❌ ' + err.message);
-  }
-  // Show full step log in diagnostic area
-  const el = document.getElementById('notif-diag');
-  if (el) el.textContent = steps.join(' · ');
-  console.log('Notification test steps:', steps);
-}
-
-// ── Init notifications UI ──
-renderNotifUI();
-// Re-render if permission changes (Chrome supports this)
-if ('permissions' in navigator) {
-  navigator.permissions.query({ name: 'notifications' }).then(status => {
-    status.onchange = renderNotifUI;
-  }).catch(() => {});
-}
-// Keep diagnostic live — refresh every 2s
-setInterval(updateDiag, 2000);
-
-// ── Notif toggle — use delegation to survive any DOM rebuilds ──
-document.addEventListener('change', e => {
-  if (e.target.id === 'notif-toggle') onNotifToggle(e.target.checked);
 });
 
 // ── Init ──
+buildSoundUI();
 buildHourGrid();
 buildDayGrid();
 buildArc();
 renderMissed();
-// Register SW early so it's ready when notifications are enabled
-if ('serviceWorker' in navigator) registerSW();
-setInterval(tick, 1000);
+renderNotifUI();
+if('permissions'in navigator){navigator.permissions.query({name:'notifications'}).then(s=>{s.onchange=renderNotifUI;}).catch(()=>{});}
+if('serviceWorker'in navigator)registerSW();
+setInterval(updateDiag,2000);
+setInterval(tick,1000);
 tick();
 </script>
 </body>
