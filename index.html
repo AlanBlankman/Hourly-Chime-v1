@@ -371,7 +371,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.02</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.03</span>
   </div>
 </header>
 
@@ -1175,34 +1175,47 @@ function closeActiveNotif() {
 }
 
 async function testNotification() {
-  if (Notification.permission !== 'granted') {
-    showToast('Permission not granted');
-    return;
-  }
-  const h = new Date().getHours();
-  const title = `⏰ ${formatHour(h)} — Test Notification`;
-  const opts = {
-    body: 'If you see this, notifications are working! Tap Dismiss to test that action.',
-    tag: 'hourly-chime-test',
-    requireInteraction: true,
-    silent: true,
-    actions: [{ action: 'dismiss', title: 'Dismiss' }],
-  };
+  const steps = [];
   try {
+    // Step 1: permission
+    steps.push(`1. Permission: ${Notification.permission}`);
+    if (Notification.permission !== 'granted') {
+      showToast('❌ Permission not granted'); return;
+    }
+
+    // Step 2: SW
+    steps.push(`2. swReg: ${swReg ? 'yes' : 'no'}`);
+
+    // Step 3: toggle
+    const toggleOn = document.getElementById('notif-toggle')?.checked;
+    steps.push(`3. Toggle: ${toggleOn}`);
+
+    // Step 4: try sending
     if (swReg) {
-      console.log('Sending via SW...');
-      await swReg.showNotification(title, opts);
-      showToast('Sent via SW ✓ — check shade');
+      steps.push('4. Trying SW.showNotification...');
+      await swReg.showNotification('⏰ Test — Hourly Chime', {
+        body: 'Notifications are working!',
+        tag: 'hourly-chime-test',
+        requireInteraction: false,
+        silent: false,
+        actions: [{ action: 'dismiss', title: 'Dismiss' }],
+      });
+      steps.push('5. SW.showNotification() resolved OK');
+      showToast('✓ Sent — check notification shade');
     } else {
-      console.log('Sending via Notification API...');
-      const n = new Notification(title, { body: opts.body, requireInteraction: true, silent: true });
-      n.onclick = () => { n.close(); window.focus(); };
-      showToast('Sent via Notification API ✓ — check shade');
+      steps.push('4. No SW — trying Notification API...');
+      new Notification('⏰ Test — Hourly Chime', { body: 'Notifications are working!' });
+      steps.push('5. Notification() created OK');
+      showToast('✓ Sent via API — check shade');
     }
   } catch(err) {
-    console.error('Notification error:', err);
-    showToast('Error: ' + err.message);
+    steps.push(`ERROR: ${err.name}: ${err.message}`);
+    showToast('❌ ' + err.message);
   }
+  // Show full step log in diagnostic area
+  const el = document.getElementById('notif-diag');
+  if (el) el.textContent = steps.join(' · ');
+  console.log('Notification test steps:', steps);
 }
 
 // ── Init notifications UI ──
