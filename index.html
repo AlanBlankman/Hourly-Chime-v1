@@ -1065,11 +1065,12 @@ function onNotifToggle(checked) {
 }
 
 function getDiag() {
+  const toggleOn = document.getElementById('notif-toggle')?.checked ?? false;
   return [
     `Permission: ${Notification.permission}`,
     `SW supported: ${'serviceWorker' in navigator}`,
     `SW registered: ${swReg ? 'yes' : (swRegError ? 'FAILED: ' + swRegError : 'no')}`,
-    `Notifications enabled: ${notifEnabled}`,
+    `Notifications enabled: ${toggleOn}`,
     `Standalone PWA: ${window.matchMedia('(display-mode: standalone)').matches}`,
   ].join(' · ');
 }
@@ -1131,7 +1132,9 @@ function renderNotifUI() {
 
 // --- Show a notification when a chime fires ---
 async function showChimeNotification(h) {
-  if (!notifEnabled) return;
+  // Read toggle state directly from DOM rather than relying on notifEnabled variable
+  const toggleOn = document.getElementById('notif-toggle')?.checked;
+  if (!toggleOn) return;
   if (Notification.permission !== 'granted') return;
 
   const title = `⏰ ${formatHour(h)} — Hourly Chime`;
@@ -1210,8 +1213,10 @@ if ('permissions' in navigator) {
 // Keep diagnostic live — refresh every 2s
 setInterval(updateDiag, 2000);
 
-// ── Notif toggle ──
-document.getElementById('notif-toggle').addEventListener('change', e => onNotifToggle(e.target.checked));
+// ── Notif toggle — use delegation to survive any DOM rebuilds ──
+document.addEventListener('change', e => {
+  if (e.target.id === 'notif-toggle') onNotifToggle(e.target.checked);
+});
 
 // ── Init ──
 buildHourGrid();
