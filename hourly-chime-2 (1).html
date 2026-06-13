@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111827">
+<title>Hourly Chime</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1f2e;
+    --surface2: #222840;
+    --border: #2d3555;
+    --amber: #f59e0b;
+    --amber-glow: rgba(245,158,11,0.15);
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Header */
+  header {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 50;
+  }
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; font-weight: 600;
+    letter-spacing: 0.04em; color: var(--amber);
+  }
+  #live-clock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--text-dim); letter-spacing: 0.06em;
+  }
+
+  /* Master card */
+  .master-card {
+    margin: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .master-label { display: flex; flex-direction: column; gap: 3px; }
+  .master-label .title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .master-label .sub { font-size: 12px; color: var(--text-muted); }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red); display: inline-block; margin-right: 6px; transition: background 0.3s;
+  }
+  .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* Toggle */
+  .toggle { position: relative; width: 52px; height: 28px; cursor: pointer; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; transition: background 0.25s, border-color 0.25s;
+  }
+  .toggle input:checked ~ .toggle-track { background: var(--amber); border-color: var(--amber); }
+  .toggle-thumb {
+    position: absolute; top: 4px; left: 4px;
+    width: 20px; height: 20px; background: #fff; border-radius: 50%;
+    transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .toggle input:checked ~ .toggle-track ~ .toggle-thumb { transform: translateX(24px); }
+
+  /* Arc card */
+  .arc-card {
+    margin: 0 16px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .arc-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--text-muted); align-self: flex-start;
+  }
+  #arc-svg { width: 220px; height: 220px; }
+
+  /* Section */
+  .section {
+    margin: 0 16px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 18px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-body { padding: 16px 18px; }
+
+  /* Chime grid */
+  .chime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .chime-btn {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 10px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .chime-btn.selected { border-color: var(--amber); background: var(--amber-glow); }
+  .chime-btn .icon { font-size: 22px; }
+  .chime-btn .label { font-size: 12px; font-weight: 500; color: var(--text-dim); text-align: center; line-height: 1.3; }
+  .chime-btn.selected .label { color: var(--amber); }
+
+  .action-btn {
+    margin-top: 8px; width: 100%;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    color: var(--text-dim); font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .action-btn:active { border-color: var(--amber); color: var(--amber); }
+
+  /* Time range */
+  .time-range-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .time-range-row label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .time-input {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 15px;
+    width: 96px; outline: none; text-align: center;
+    -webkit-appearance: none; appearance: none;
+  }
+  .time-input:focus { border-color: var(--amber); }
+  .time-range-sep { color: var(--text-muted); font-size: 14px; }
+
+  /* Day grid */
+  .day-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .day-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .day-btn.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); }
+
+  /* Presets */
+  .preset-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  .preset-btn {
+    padding: 7px 13px; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 20px; color: var(--text-dim); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif;
+  }
+  .preset-btn:active { border-color: var(--amber); color: var(--amber); }
+
+  /* Hour grid */
+  .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+  .hour-cell {
+    aspect-ratio: 1; border-radius: 7px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--text-muted); font-size: 11px;
+    font-family: 'JetBrains Mono', monospace; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; user-select: none;
+  }
+  .hour-cell.active { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); font-weight: 600; }
+  .hour-cell.disabled { opacity: 0.25; cursor: not-allowed; }
+
+  /* Next chime banner */
+  .next-banner {
+    margin: 0 16px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .next-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+  .next-time { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: var(--amber); }
+  .next-countdown { font-size: 12px; color: var(--text-muted); }
+
+  /* Tabs */
+  .tabs {
+    display: flex; margin: 16px 16px 0;
+    border-bottom: 1px solid var(--border); gap: 2px;
+  }
+  .tab {
+    padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Volume */
+  .vol-row { display: flex; align-items: center; gap: 10px; }
+  .vol-row span { font-size: 12px; color: var(--text-muted); width: 28px; text-align: right; }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 4px;
+    border-radius: 2px; background: var(--surface2); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--amber); cursor: pointer;
+  }
+
+  /* Timeout chips */
+  .timeout-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .timeout-chip {
+    padding: 6px 14px; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 20px; color: var(--text-muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .timeout-chip.selected { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+
+  /* ── DISMISS OVERLAY ── */
+  #dismiss-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(10, 12, 20, 0.97);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 24px; padding: 32px;
+  }
+  #dismiss-overlay.active { display: flex; }
+
+  .dismiss-hour {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 60px; font-weight: 600; color: var(--amber);
+    letter-spacing: -2px; line-height: 1;
+  }
+  .dismiss-label {
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: -14px;
+  }
+
+  /* Countdown ring */
+  #ring-wrap { position: relative; width: 148px; height: 148px; }
+  #ring-svg { width: 148px; height: 148px; transform: rotate(-90deg); }
+  #ring-track { fill: none; stroke: var(--surface2); stroke-width: 9; }
+  #ring-fill {
+    fill: none; stroke: var(--amber); stroke-width: 9; stroke-linecap: round;
+    transition: stroke-dashoffset 0.95s linear, stroke 0.4s;
+  }
+  #ring-num {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 38px; font-weight: 600; color: var(--text);
+  }
+
+  /* Dismiss button */
+  #dismiss-btn {
+    width: 100%; max-width: 320px; padding: 22px;
+    background: var(--amber); border: none; border-radius: 18px;
+    font-family: 'Inter', sans-serif; font-size: 19px; font-weight: 700;
+    color: #000; cursor: pointer; letter-spacing: 0.04em;
+    box-shadow: 0 0 48px rgba(245,158,11,0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #dismiss-btn:active { transform: scale(0.97); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+  .dismiss-hint { font-size: 12px; color: var(--text-muted); text-align: center; }
+
+  /* ── MISSED ALARMS ── */
+  .missed-list { display: flex; flex-direction: column; gap: 8px; }
+  .missed-item {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 10px; padding: 12px 14px;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+  .missed-icon { font-size: 20px; flex-shrink: 0; }
+  .missed-text { flex: 1; }
+  .missed-time { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--red); }
+  .missed-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .clear-missed-btn {
+    margin-top: 10px; width: 100%;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; color: var(--text-muted);
+    font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .clear-missed-btn:active { color: var(--red); border-color: var(--red); }
+
+  /* Notification card */
+  .notif-card { display:flex; align-items:flex-start; gap:14px; }
+  .notif-icon-wrap {
+    width:42px; height:42px; border-radius:12px;
+    background:var(--amber-glow); border:1px solid rgba(245,158,11,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0;
+  }
+  .notif-text { flex:1; }
+  .notif-text .ntitle { font-size:14px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .notif-text .nsub   { font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .nperm {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.08em; margin-top:6px;
+    padding:3px 8px; border-radius:10px;
+  }
+  .nperm .dot { width:6px; height:6px; border-radius:50%; }
+  .nperm.granted { color:var(--green); background:rgba(16,185,129,0.1); }
+  .nperm.granted .dot { background:var(--green); box-shadow:0 0 5px var(--green); }
+  .nperm.denied  { color:var(--red);   background:rgba(239,68,68,0.1); }
+  .nperm.denied  .dot { background:var(--red); }
+  .nperm.unknown { color:var(--text-muted); background:rgba(255,255,255,0.05); }
+  .nperm.unknown .dot { background:var(--text-muted); }
+
+  .notif-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .notif-req-btn {
+    padding:8px 18px; border:none; border-radius:8px;
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    cursor:pointer; transition:opacity 0.15s;
+  }
+  .notif-req-btn.primary { background:var(--amber); color:#000; }
+  .notif-req-btn.primary:active { opacity:0.8; }
+  .notif-req-btn.secondary {
+    background:var(--surface2); border:1.5px solid var(--border);
+    color:var(--text-dim);
+  }
+  .ios-note {
+    margin-top:10px; padding:10px 12px;
+    background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2);
+    border-radius:8px; font-size:12px; color:var(--text-muted); line-height:1.5;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 24px; padding: 12px 22px;
+    font-size: 13px; color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none; z-index: 100; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⏰ Hourly Chime</h1>
+  <span id="live-clock">--:--:--</span>
+</header>
+
+<!-- Master toggle -->
+<div class="master-card">
+  <div class="master-label">
+    <div class="title"><span class="status-dot" id="status-dot"></span><span id="status-text">Chime Off</span></div>
+    <div class="sub" id="status-sub">Enable to activate hourly chimes</div>
+  </div>
+  <label class="toggle">
+    <input type="checkbox" id="master-toggle">
+    <div class="toggle-track"></div>
+    <div class="toggle-thumb"></div>
+  </label>
+</div>
+
+<!-- Next chime -->
+<div class="next-banner">
+  <div>
+    <div class="next-label">Next Chime</div>
+    <div class="next-time" id="next-time">--:--</div>
+  </div>
+  <div class="next-countdown" id="next-countdown">—</div>
+</div>
+
+<!-- Arc clock -->
+<div class="arc-card">
+  <div class="arc-title">Scheduled Hours (24h view)</div>
+  <svg id="arc-svg" viewBox="0 0 220 220"></svg>
+</div>
+
+<!-- Missed alarms (shown only when there are misses) -->
+<div class="section" id="missed-section" style="display:none;">
+  <div class="section-header">⚠️ Missed Alarms</div>
+  <div class="section-body">
+    <div class="missed-list" id="missed-list"></div>
+    <button class="clear-missed-btn" onclick="clearMissed()">Clear all</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" data-tab="schedule">Schedule</button>
+  <button class="tab" data-tab="sound">Sound</button>
+</div>
+
+<!-- Schedule tab -->
+<div class="tab-panel active" id="tab-schedule">
+  <div class="section" style="margin-top:14px">
+    <div class="section-header">Active Hours Window</div>
+    <div class="section-body">
+      <div class="time-range-row">
+        <label>From</label>
+        <input type="time" class="time-input" id="time-start" value="08:00">
+        <span class="time-range-sep">→</span>
+        <label>To</label>
+        <input type="time" class="time-input" id="time-end" value="22:00">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Days</div>
+    <div class="section-body">
+      <div class="day-grid" id="day-grid">
+        <button class="day-btn active" data-day="0">Su</button>
+        <button class="day-btn active" data-day="1">Mo</button>
+        <button class="day-btn active" data-day="2">Tu</button>
+        <button class="day-btn active" data-day="3">We</button>
+        <button class="day-btn active" data-day="4">Th</button>
+        <button class="day-btn active" data-day="5">Fr</button>
+        <button class="day-btn active" data-day="6">Sa</button>
+      </div>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="setDays([1,2,3,4,5])">Weekdays</button>
+        <button class="preset-btn" onclick="setDays([0,6])">Weekends</button>
+        <button class="preset-btn" onclick="setDays([0,1,2,3,4,5,6])">Every Day</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Hours to Chime</div>
+    <div class="section-body">
+      <div class="preset-row">
+        <button class="preset-btn" onclick="applyHourPreset('all')">All hours</button>
+        <button class="preset-btn" onclick="applyHourPreset('even')">Even (0,2,4…)</button>
+        <button class="preset-btn" onclick="applyHourPreset('odd')">Odd (1,3,5…)</button>
+        <button class="preset-btn" onclick="applyHourPreset('none')">Clear</button>
+      </div>
+      <div class="hour-grid" id="hour-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sound tab -->
+<div class="tab-panel" id="tab-sound">
+  <div class="section" style="margin-top:14px">
+    <div class="section-header">Chime Sound</div>
+    <div class="section-body">
+      <div class="chime-grid" id="chime-grid">
+        <button class="chime-btn selected" data-chime="bell">
+          <span class="icon">🔔</span><span class="label">Bell</span>
+        </button>
+        <button class="chime-btn" data-chime="cuckoo">
+          <span class="icon">🕐</span><span class="label">Cuckoo Clock</span>
+        </button>
+        <button class="chime-btn" data-chime="digital">
+          <span class="icon">📟</span><span class="label">Digital Beep</span>
+        </button>
+        <button class="chime-btn" data-chime="chime">
+          <span class="icon">🎵</span><span class="label">Westminster</span>
+        </button>
+        <button class="chime-btn" data-chime="soft">
+          <span class="icon">🌙</span><span class="label">Soft Tone</span>
+        </button>
+        <button class="chime-btn" data-chime="vibrate">
+          <span class="icon">📳</span><span class="label">Vibrate Only</span>
+        </button>
+      </div>
+      <button class="action-btn" onclick="testChime()">▶ Test Selected Chime</button>
+      <button class="action-btn" style="border-color:#475569" onclick="scheduleTestFire()">⏱ Fire at Next :00 (verify timing)</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Volume</div>
+    <div class="section-body">
+      <div class="vol-row">
+        <span style="font-size:16px;width:auto">🔈</span>
+        <input type="range" id="volume" min="0" max="100" value="70">
+        <span id="vol-label">70%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Dismiss Timeout</div>
+    <div class="section-body">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Chime repeats until dismissed or timeout expires</div>
+      <div class="timeout-chips" id="timeout-chips">
+        <button class="timeout-chip" data-sec="10">10s</button>
+        <button class="timeout-chip selected" data-sec="15">15s</button>
+        <button class="timeout-chip" data-sec="30">30s</button>
+        <button class="timeout-chip" data-sec="60">60s</button>
+        <button class="timeout-chip" data-sec="120">2 min</button>
+        <button class="timeout-chip" data-sec="0">Never</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Notifications</span>
+      <label class="toggle" style="margin:0">
+        <input type="checkbox" id="notif-toggle">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <div class="section-body">
+      <div class="notif-card">
+        <div class="notif-icon-wrap">🔔</div>
+        <div class="notif-text">
+          <div class="ntitle">Chime Notifications</div>
+          <div class="nsub">Show a system notification when a chime fires. Tap it to bring the app to the foreground, or use the Dismiss action to stop the chime without opening the app.</div>
+          <div class="nperm unknown" id="nperm-badge"><span class="dot"></span><span id="nperm-text">Checking…</span></div>
+        </div>
+      </div>
+      <div id="notif-actions" class="notif-actions"></div>
+      <div class="ios-note" id="ios-note" style="display:none">
+        ⚠️ <strong style="color:var(--amber)">iOS limitation:</strong> Safari does not support web notifications, even when added to the home screen. Notifications work on Android Chrome and desktop browsers.
+      </div>
+    </div>
+  </div>
+
+</div><!-- end sound tab -->
+<div id="dismiss-overlay">
+  <div class="dismiss-hour" id="dismiss-hour-text">12:00</div>
+  <div class="dismiss-label">Hourly Chime</div>
+
+  <div id="ring-wrap">
+    <svg id="ring-svg" viewBox="0 0 148 148">
+      <circle id="ring-track" cx="74" cy="74" r="62"/>
+      <circle id="ring-fill"  cx="74" cy="74" r="62"/>
+    </svg>
+    <div id="ring-num">15</div>
+  </div>
+
+  <button id="dismiss-btn" onclick="dismissChime()">TAP TO DISMISS</button>
+  <div class="dismiss-hint" id="dismiss-hint">Chime will stop automatically when timer expires</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──
+const state = {
+  enabled: false,
+  hours: new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]),
+  days: new Set([0,1,2,3,4,5,6]),
+  startHour: 8,
+  endHour: 22,
+  chime: 'bell',
+  volume: 0.7,
+  dismissTimeout: 15,
+};
+
+let missedAlarms = [];
+
+// ── AudioContext ──
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+async function resumeAudio() {
+  const ctx = getAudio();
+  if (ctx.state === 'suspended') await ctx.resume();
+  return ctx;
+}
+
+// ── Single chime play, returns duration in seconds ──
+async function playChimeOnce(type) {
+  if (type === 'vibrate') {
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+    return 0.7;
+  }
+  const ctx = await resumeAudio();
+  const vol = state.volume;
+  const t0 = ctx.currentTime;
+
+  if (type === 'bell') {
+    [[440,1.0],[880,0.4],[1320,0.2],[1760,0.1]].forEach(([freq,amp]) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(amp*vol*0.4, t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+3.0);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0+3.1);
+    });
+    return 3.2;
+  }
+  if (type === 'cuckoo') {
+    [0, 0.45].forEach((offset, i) => {
+      const t = t0 + offset;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(i===0?660:524, t);
+      g.gain.setValueAtTime(vol*0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.35);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t+0.36);
+    });
+    return 1.0;
+  }
+  if (type === 'digital') {
+    [0, 0.2].forEach(offset => {
+      const t = t0 + offset;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'square'; osc.frequency.setValueAtTime(880, t);
+      g.gain.setValueAtTime(vol*0.25, t);
+      g.gain.setValueAtTime(vol*0.25, t+0.12);
+      g.gain.linearRampToValueAtTime(0, t+0.14);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t+0.15);
+    });
+    return 0.6;
+  }
+  if (type === 'chime') {
+    [330,262,294,196].forEach((freq, i) => {
+      const t = t0 + i*0.38;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(vol*0.45, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.8);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t+0.85);
+    });
+    return 2.2;
+  }
+  if (type === 'soft') {
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(528, t0);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol*0.4, t0+0.3);
+    g.gain.setValueAtTime(vol*0.4, t0+0.9);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+2.5);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0+2.6);
+    return 2.7;
+  }
+  return 1.0;
+}
+
+// ── Repeating chime loop ──
+let loopActive = false;
+let loopTimer = null;
+
+async function startChimeLoop(type) {
+  loopActive = true;
+  const run = async () => {
+    if (!loopActive) return;
+    const dur = await playChimeOnce(type);
+    const pause = type === 'vibrate' ? 800 : Math.max(400, dur * 200);
+    loopTimer = setTimeout(run, dur * 1000 + pause);
+  };
+  run();
+}
+
+function stopChimeLoop() {
+  loopActive = false;
+  clearTimeout(loopTimer);
+  loopTimer = null;
+}
+
+// ── Dismiss overlay ──
+const CIRC = 2 * Math.PI * 62; // r=62
+let dismissTimer = null;
+let dismissInterval = null;
+let activeAlarmHour = null;
+
+function showDismissOverlay(h) {
+  activeAlarmHour = h;
+  document.getElementById('dismiss-hour-text').textContent = formatHour(h);
+  document.getElementById('dismiss-overlay').classList.add('active');
+
+  const fill = document.getElementById('ring-fill');
+  const numEl = document.getElementById('ring-num');
+  const hint = document.getElementById('dismiss-hint');
+  fill.style.strokeDasharray = CIRC;
+
+  const timeout = state.dismissTimeout;
+
+  if (timeout === 0) {
+    fill.style.strokeDashoffset = 0;
+    fill.style.stroke = 'var(--amber)';
+    numEl.textContent = '∞';
+    numEl.style.fontSize = '30px';
+    hint.textContent = 'Tap to dismiss — chime runs until you do';
+    return;
+  }
+
+  numEl.style.fontSize = '38px';
+  let remaining = timeout;
+
+  const update = () => {
+    const frac = remaining / timeout;
+    fill.style.strokeDashoffset = CIRC * (1 - frac);
+    fill.style.stroke = frac > 0.4 ? 'var(--amber)' : frac > 0.18 ? '#f97316' : 'var(--red)';
+    numEl.textContent = remaining;
+    hint.textContent = `Auto-dismissing in ${remaining}s — tap to dismiss now`;
+  };
+
+  update();
+  dismissInterval = setInterval(() => {
+    remaining = Math.max(0, remaining - 1);
+    update();
+  }, 1000);
+
+  dismissTimer = setTimeout(() => missChime(h), timeout * 1000);
+}
+
+function dismissChime() {
+  stopChimeLoop();
+  clearTimeout(dismissTimer);
+  clearInterval(dismissInterval);
+  document.getElementById('dismiss-overlay').classList.remove('active');
+  closeActiveNotif();
+  activeAlarmHour = null;
+}
+
+function missChime(h) {
+  stopChimeLoop();
+  clearInterval(dismissInterval);
+  document.getElementById('dismiss-overlay').classList.remove('active');
+  closeActiveNotif();
+  missedAlarms.unshift({ hour: h, ts: new Date() });
+  renderMissed();
+  activeAlarmHour = null;
+}
+
+// ── Missed alarms ──
+function renderMissed() {
+  const section = document.getElementById('missed-section');
+  const list = document.getElementById('missed-list');
+  if (missedAlarms.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = '';
+  missedAlarms.forEach(m => {
+    const timeStr = m.ts.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const dateStr = m.ts.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+    const item = document.createElement('div');
+    item.className = 'missed-item';
+    item.innerHTML = `
+      <span class="missed-icon">🔕</span>
+      <div class="missed-text">
+        <div class="missed-time">Missed: ${formatHour(m.hour)}</div>
+        <div class="missed-sub">Timed out at ${timeStr} · ${dateStr}</div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function clearMissed() { missedAlarms = []; renderMissed(); }
+
+// ── Trigger ──
+async function triggerChime(h) {
+  await resumeAudio();
+  startChimeLoop(state.chime);
+  showDismissOverlay(h);
+  showChimeNotification(h);
+}
+
+// ── Clock ──
+function formatTime(d) {
+  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+}
+function formatHour(h) {
+  const ap = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:00 ${ap}`;
+}
+
+let lastCheckedHour = -1;
+let testNextMinute = false;
+
+function tick() {
+  const now = new Date();
+  document.getElementById('live-clock').textContent = formatTime(now);
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+
+  if (testNextMinute && s < 5) {
+    testNextMinute = false;
+    triggerChime(h);
+  }
+
+  if (m === 0 && s < 5 && h !== lastCheckedHour) {
+    lastCheckedHour = h;
+    if (shouldChimeAt(h, now.getDay())) triggerChime(h);
+  } else if (m !== 0) {
+    lastCheckedHour = -1;
+  }
+
+  updateNextChime(now);
+}
+
+function shouldChimeAt(h, day) {
+  if (!state.enabled) return false;
+  if (!state.hours.has(h)) return false;
+  if (!state.days.has(day)) return false;
+  if (h < state.startHour || h >= state.endHour) return false;
+  return true;
+}
+
+function updateNextChime(now) {
+  if (!state.enabled) {
+    document.getElementById('next-time').textContent = '——';
+    document.getElementById('next-countdown').textContent = 'Chime disabled';
+    return;
+  }
+  for (let delta = 1; delta <= 24; delta++) {
+    const t = new Date(now);
+    t.setMinutes(0, 0, 0);
+    t.setHours(now.getHours() + delta);
+    const h = t.getHours(), day = t.getDay();
+    if (shouldChimeAt(h, day)) {
+      const diff = t - now;
+      const mins = Math.floor(diff / 60000);
+      const hrs = Math.floor(mins / 60), rem = mins % 60;
+      document.getElementById('next-time').textContent = formatHour(h);
+      document.getElementById('next-countdown').textContent =
+        hrs > 0 ? `in ${hrs}h ${rem}m` : `in ${mins}m`;
+      return;
+    }
+  }
+  document.getElementById('next-time').textContent = '——';
+  document.getElementById('next-countdown').textContent = 'No hours scheduled';
+}
+
+// ── Arc SVG ──
+function buildArc() {
+  const svg = document.getElementById('arc-svg');
+  svg.innerHTML = '';
+  const cx=110, cy=110, r=90, ir=58, total=24, gap=2.5;
+  const dpH = 360/total;
+
+  const numActive = [...state.hours].filter(h => h >= state.startHour && h < state.endHour).length;
+
+  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x',cx); txt.setAttribute('y',cy-6); txt.setAttribute('text-anchor','middle');
+  txt.setAttribute('fill','#e2e8f0'); txt.setAttribute('font-family','JetBrains Mono,monospace');
+  txt.setAttribute('font-size','28'); txt.setAttribute('font-weight','600');
+  txt.textContent = numActive; svg.appendChild(txt);
+
+  const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
+  sub.setAttribute('x',cx); sub.setAttribute('y',cy+16); sub.setAttribute('text-anchor','middle');
+  sub.setAttribute('fill','#64748b'); sub.setAttribute('font-family','Inter,sans-serif');
+  sub.setAttribute('font-size','11'); sub.textContent='hours active'; svg.appendChild(sub);
+
+  for (let h=0; h<24; h++) {
+    const s0=(h*dpH-90+gap/2)*Math.PI/180, s1=(h*dpH-90+dpH-gap/2)*Math.PI/180;
+    const x1=cx+r*Math.cos(s0), y1=cy+r*Math.sin(s0);
+    const x2=cx+r*Math.cos(s1), y2=cy+r*Math.sin(s1);
+    const x3=cx+ir*Math.cos(s1),y3=cy+ir*Math.sin(s1);
+    const x4=cx+ir*Math.cos(s0),y4=cy+ir*Math.sin(s0);
+    const inWin = h >= state.startHour && h < state.endHour;
+    const active = state.hours.has(h) && inWin && state.enabled;
+    const sched  = state.hours.has(h) && inWin;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 0 0 ${x4} ${y4}Z`);
+    path.setAttribute('fill', active?'#f59e0b':sched?'rgba(245,158,11,0.25)':'#1e2535');
+    path.setAttribute('stroke','#0f1117'); path.setAttribute('stroke-width','1');
+    svg.appendChild(path);
+
+    if (h%6===0) {
+      const midA=((h*dpH-90+dpH/2))*Math.PI/180, lr=r+13;
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',cx+lr*Math.cos(midA)); lbl.setAttribute('y',cy+lr*Math.sin(midA)+4);
+      lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('fill','#64748b');
+      lbl.setAttribute('font-family','JetBrains Mono,monospace'); lbl.setAttribute('font-size','9');
+      lbl.textContent=h===0?'12a':h===6?'6a':h===12?'12p':'6p';
+      svg.appendChild(lbl);
+    }
+  }
+}
+
+// ── Hour grid ──
+function buildHourGrid() {
+  const grid = document.getElementById('hour-grid');
+  grid.innerHTML = '';
+  for (let h=0; h<24; h++) {
+    const inWin = h >= state.startHour && h < state.endHour;
+    const cell = document.createElement('button');
+    cell.className = 'hour-cell' + (state.hours.has(h)?' active':'') + (inWin?'':' disabled');
+    cell.textContent = h.toString().padStart(2,'0');
+    cell.addEventListener('click', () => {
+      if (!inWin) { showToast('Outside active window'); return; }
+      state.hours.has(h) ? state.hours.delete(h) : state.hours.add(h);
+      buildHourGrid(); buildArc();
+    });
+    grid.appendChild(cell);
+  }
+}
+
+function applyHourPreset(type) {
+  state.hours.clear();
+  for (let h=0; h<24; h++) {
+    const inWin = h >= state.startHour && h < state.endHour;
+    if (!inWin) continue;
+    if (type==='all') state.hours.add(h);
+    else if (type==='even' && h%2===0) state.hours.add(h);
+    else if (type==='odd'  && h%2!==0) state.hours.add(h);
+  }
+  buildHourGrid(); buildArc();
+}
+
+// ── Day grid ──
+function buildDayGrid() {
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    const d = parseInt(btn.dataset.day);
+    btn.classList.toggle('active', state.days.has(d));
+    btn.onclick = () => {
+      state.days.has(d) ? state.days.delete(d) : state.days.add(d);
+      buildDayGrid();
+    };
+  });
+}
+function setDays(arr) { state.days = new Set(arr); buildDayGrid(); }
+
+// ── Time range ──
+document.getElementById('time-start').addEventListener('change', e => {
+  state.startHour = parseInt(e.target.value); buildHourGrid(); buildArc();
+});
+document.getElementById('time-end').addEventListener('change', e => {
+  state.endHour = parseInt(e.target.value); buildHourGrid(); buildArc();
+});
+
+// ── Master toggle ──
+document.getElementById('master-toggle').addEventListener('change', e => {
+  state.enabled = e.target.checked;
+  document.getElementById('status-dot').classList.toggle('active', state.enabled);
+  document.getElementById('status-text').textContent = state.enabled ? 'Chime Active' : 'Chime Off';
+  document.getElementById('status-sub').textContent  = state.enabled ? 'Chiming at scheduled hours' : 'Enable to activate hourly chimes';
+  buildArc();
+  showToast(state.enabled ? '🔔 Chime enabled' : 'Chime disabled');
+  if (state.enabled) resumeAudio();
+});
+
+// ── Chime selection ──
+document.getElementById('chime-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.chime-btn');
+  if (!btn) return;
+  document.querySelectorAll('.chime-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.chime = btn.dataset.chime;
+});
+
+// ── Volume ──
+document.getElementById('volume').addEventListener('input', e => {
+  state.volume = e.target.value / 100;
+  document.getElementById('vol-label').textContent = e.target.value + '%';
+});
+
+// ── Timeout chips ──
+document.getElementById('timeout-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.timeout-chip');
+  if (!chip) return;
+  document.querySelectorAll('.timeout-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  state.dismissTimeout = parseInt(chip.dataset.sec);
+});
+
+// ── Test ──
+function testChime() { triggerChime(new Date().getHours()); }
+function scheduleTestFire() {
+  testNextMinute = true;
+  const s = 60 - new Date().getSeconds();
+  showToast(`⏱ Will fire in ~${s}s at :00`);
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Notifications ──
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+let swReg = null;          // ServiceWorkerRegistration
+let activeNotif = null;    // Notification object (non-SW path)
+let notifEnabled = false;  // user toggle
+
+// --- Service Worker source (handles notificationclick + notificationclose) ---
+const SW_SOURCE = `
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  if (e.action === 'dismiss') {
+    // Tell the page to dismiss the chime
+    e.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+        list.forEach(c => c.postMessage({ type: 'DISMISS_CHIME' }));
+      })
+    );
+  } else {
+    // Tap body: focus/open the app
+    e.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+        if (list.length) { list[0].focus(); list[0].postMessage({ type: 'FOCUS_APP' }); }
+        else clients.openWindow(self.location.origin);
+      })
+    );
+  }
+});
+self.addEventListener('notificationclose', e => {
+  // Notification swiped away — treat as dismiss
+  clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    list.forEach(c => c.postMessage({ type: 'DISMISS_CHIME' }));
+  });
+});
+`;
+
+async function registerSW() {
+  if (!('serviceWorker' in navigator)) return false;
+  try {
+    const blob = new Blob([SW_SOURCE], { type: 'application/javascript' });
+    const url  = URL.createObjectURL(blob);
+    swReg = await navigator.serviceWorker.register(url, { scope: './' });
+    // Listen for messages from SW
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'DISMISS_CHIME') dismissChime();
+      if (e.data?.type === 'FOCUS_APP')    showDismissOverlay(activeAlarmHour ?? new Date().getHours());
+    });
+    return true;
+  } catch(err) {
+    console.warn('SW registration failed:', err);
+    return false;
+  }
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  const result = await Notification.requestPermission();
+  if (result === 'granted') {
+    await registerSW();
+    notifEnabled = true;
+    document.getElementById('notif-toggle').checked = true;
+  }
+  renderNotifUI();
+}
+
+function onNotifToggle(checked) {
+  if (!('Notification' in window) || isIOS) {
+    document.getElementById('notif-toggle').checked = false;
+    return;
+  }
+  if (checked && Notification.permission !== 'granted') {
+    document.getElementById('notif-toggle').checked = false;
+    requestNotifPermission();
+    return;
+  }
+  notifEnabled = checked;
+  if (checked && !swReg) registerSW();
+}
+
+function renderNotifUI() {
+  const badge   = document.getElementById('nperm-badge');
+  const permTxt = document.getElementById('nperm-text');
+  const actions = document.getElementById('notif-actions');
+  const iosNote = document.getElementById('ios-note');
+
+  if (isIOS) {
+    badge.className = 'nperm denied';
+    permTxt.textContent = 'Not supported on iOS';
+    iosNote.style.display = '';
+    document.getElementById('notif-toggle').disabled = true;
+    actions.innerHTML = '';
+    return;
+  }
+
+  if (!('Notification' in window)) {
+    badge.className = 'nperm denied';
+    permTxt.textContent = 'Not supported in this browser';
+    actions.innerHTML = '';
+    return;
+  }
+
+  const perm = Notification.permission;
+  if (perm === 'granted') {
+    badge.className = 'nperm granted';
+    permTxt.textContent = 'Permission granted';
+    actions.innerHTML = '';
+  } else if (perm === 'denied') {
+    badge.className = 'nperm denied';
+    permTxt.textContent = 'Permission denied';
+    actions.innerHTML = `<p style="font-size:12px;color:var(--text-muted)">Notifications are blocked. Enable them in your browser's site settings, then reload.</p>`;
+    document.getElementById('notif-toggle').disabled = true;
+  } else {
+    badge.className = 'nperm unknown';
+    permTxt.textContent = 'Permission not yet granted';
+    actions.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.className = 'notif-req-btn primary';
+    btn.textContent = 'Enable Notifications';
+    btn.onclick = requestNotifPermission;
+    actions.appendChild(btn);
+  }
+}
+
+// --- Show a notification when a chime fires ---
+async function showChimeNotification(h) {
+  if (!notifEnabled) return;
+  if (Notification.permission !== 'granted') return;
+
+  const title = `⏰ ${formatHour(h)} — Hourly Chime`;
+  const opts = {
+    body: 'Tap to open the app, or dismiss to stop the chime.',
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52">⏰</text></svg>',
+    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52">🔔</text></svg>',
+    tag: 'hourly-chime',
+    renotify: true,
+    requireInteraction: true,
+    actions: [{ action: 'dismiss', title: 'Dismiss' }],
+    vibrate: [200, 100, 200],
+    silent: true,   // we handle audio ourselves
+  };
+
+  try {
+    if (swReg) {
+      await swReg.showNotification(title, opts);
+    } else {
+      // Fallback: plain Notification (no actions, but click still works)
+      closeActiveNotif();
+      const n = new Notification(title, { body: opts.body, icon: opts.icon, tag: opts.tag, requireInteraction: true, silent: true });
+      n.onclick = () => { n.close(); window.focus(); showDismissOverlay(h); };
+      n.onclose = () => { dismissChime(); };
+      activeNotif = n;
+    }
+  } catch(err) {
+    console.warn('Notification failed:', err);
+  }
+}
+
+function closeActiveNotif() {
+  if (activeNotif) { activeNotif.close(); activeNotif = null; }
+  // Also close any SW notifications
+  if (swReg) swReg.getNotifications({ tag: 'hourly-chime' }).then(ns => ns.forEach(n => n.close()));
+}
+
+// ── Init notifications UI ──
+renderNotifUI();
+// Re-render if permission changes (Chrome supports this)
+if ('permissions' in navigator) {
+  navigator.permissions.query({ name: 'notifications' }).then(status => {
+    status.onchange = renderNotifUI;
+  }).catch(() => {});
+}
+
+// ── Notif toggle ──
+document.getElementById('notif-toggle').addEventListener('change', e => onNotifToggle(e.target.checked));
+
+// ── Init ──
+buildHourGrid();
+buildDayGrid();
+buildArc();
+renderMissed();
+setInterval(tick, 1000);
+tick();
+</script>
+</body>
+</html>
