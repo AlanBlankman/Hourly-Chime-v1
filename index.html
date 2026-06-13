@@ -371,7 +371,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.03</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.04</span>
   </div>
 </header>
 
@@ -1135,22 +1135,18 @@ function renderNotifUI() {
 
 // --- Show a notification when a chime fires ---
 async function showChimeNotification(h) {
-  // Read toggle state directly from DOM rather than relying on notifEnabled variable
   const toggleOn = document.getElementById('notif-toggle')?.checked;
   if (!toggleOn) return;
   if (Notification.permission !== 'granted') return;
 
   const title = `⏰ ${formatHour(h)} — Hourly Chime`;
   const opts = {
-    body: 'Tap to open the app, or dismiss to stop the chime.',
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52">⏰</text></svg>',
-    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52">🔔</text></svg>',
+    body: 'Tap to open the app, or use Dismiss to stop the chime.',
     tag: 'hourly-chime',
     renotify: true,
     requireInteraction: true,
     actions: [{ action: 'dismiss', title: 'Dismiss' }],
     vibrate: [200, 100, 200],
-    silent: true,   // we handle audio ourselves
   };
 
   try {
