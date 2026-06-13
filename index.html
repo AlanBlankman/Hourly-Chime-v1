@@ -244,7 +244,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.05</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.06</span>
   </div>
 </header>
 
@@ -734,7 +734,7 @@ function buildHourGrid(){
     cell.addEventListener('click',()=>{
       if(!inWin){showToast('Outside active window');return;}
       state.hours.has(h)?state.hours.delete(h):state.hours.add(h);
-      buildHourGrid();buildArc();
+      buildHourGrid();buildArc();saveSettings();
     });
     grid.appendChild(cell);
   }
@@ -747,7 +747,7 @@ function applyHourPreset(type){
     else if(type==='even'&&h%2===0)state.hours.add(h);
     else if(type==='odd'&&h%2!==0)state.hours.add(h);
   }
-  buildHourGrid();buildArc();
+  buildHourGrid();buildArc();saveSettings();
 }
 
 // ── Day grid ──
@@ -755,10 +755,10 @@ function buildDayGrid(){
   document.querySelectorAll('.day-btn').forEach(btn=>{
     const d=parseInt(btn.dataset.day);
     btn.classList.toggle('active',state.days.has(d));
-    btn.onclick=()=>{state.days.has(d)?state.days.delete(d):state.days.add(d);buildDayGrid();};
+    btn.onclick=()=>{state.days.has(d)?state.days.delete(d):state.days.add(d);buildDayGrid();saveSettings();};
   });
 }
-function setDays(arr){state.days=new Set(arr);buildDayGrid();}
+function setDays(arr){state.days=new Set(arr);buildDayGrid();saveSettings();}
 
 // ── Sound dropdown + recents ──
 function buildSoundUI(){
@@ -791,29 +791,34 @@ function buildSoundUI(){
 
 function selectSound(id){
   state.chime=id;
-  // Update recents
   state.recentSounds=state.recentSounds.filter(x=>x!==id);
   state.recentSounds.unshift(id);
   if(state.recentSounds.length>4)state.recentSounds.length=4;
-  buildSoundUI();
+  buildSoundUI(); saveSettings();
 }
-
 function toggleVibrateOnly(){
   state.vibrateOnly=!state.vibrateOnly;
   if(state.vibrateOnly)state.vibrateAlso=false;
-  buildSoundUI();
+  buildSoundUI(); saveSettings();
 }
 function toggleVibrateAlso(){
   state.vibrateAlso=!state.vibrateAlso;
   if(state.vibrateAlso)state.vibrateOnly=false;
-  buildSoundUI();
+  buildSoundUI(); saveSettings();
 }
 
 document.getElementById('sound-select').addEventListener('change',e=>selectSound(e.target.value));
 
+// Save message after user stops typing
+let msgSaveTimer;
+document.getElementById('chime-message').addEventListener('input',()=>{
+  clearTimeout(msgSaveTimer);
+  msgSaveTimer=setTimeout(saveSettings,800);
+});
+
 // ── Time range ──
-document.getElementById('time-start').addEventListener('change',e=>{state.startHour=parseInt(e.target.value);buildHourGrid();buildArc();});
-document.getElementById('time-end').addEventListener('change',e=>{state.endHour=parseInt(e.target.value);buildHourGrid();buildArc();});
+document.getElementById('time-start').addEventListener('change',e=>{state.startHour=parseInt(e.target.value);buildHourGrid();buildArc();saveSettings();});
+document.getElementById('time-end').addEventListener('change',e=>{state.endHour=parseInt(e.target.value);buildHourGrid();buildArc();saveSettings();});
 
 // ── Master toggle ──
 document.getElementById('master-toggle').addEventListener('change',e=>{
@@ -824,16 +829,18 @@ document.getElementById('master-toggle').addEventListener('change',e=>{
   buildArc();
   showToast(state.enabled?'🔔 Chime enabled':'Chime disabled');
   if(state.enabled)resumeAudio();
+  saveSettings();
 });
 
 // ── Volume ──
-document.getElementById('volume').addEventListener('input',e=>{state.volume=e.target.value/100;document.getElementById('vol-label').textContent=e.target.value+'%';});
+document.getElementById('volume').addEventListener('input',e=>{state.volume=e.target.value/100;document.getElementById('vol-label').textContent=e.target.value+'%';saveSettings();});
 
 // ── Timeout chips ──
 document.getElementById('timeout-chips').addEventListener('click',e=>{
   const chip=e.target.closest('.timeout-chip'); if(!chip)return;
   document.querySelectorAll('.timeout-chip').forEach(c=>c.classList.remove('selected'));
   chip.classList.add('selected'); state.dismissTimeout=parseInt(chip.dataset.sec);
+  saveSettings();
 });
 
 // ── Test ──
@@ -957,7 +964,84 @@ document.addEventListener('change',e=>{
   }
 });
 
+// ── Persist settings ──
+const STORAGE_KEY = 'hourlyChimeSettings_v1';
+
+function saveSettings() {
+  try {
+    const data = {
+      chime:         state.chime,
+      volume:        state.volume,
+      vibrateOnly:   state.vibrateOnly,
+      vibrateAlso:   state.vibrateAlso,
+      recentSounds:  state.recentSounds,
+      startHour:     state.startHour,
+      endHour:       state.endHour,
+      hours:         [...state.hours],
+      days:          [...state.days],
+      dismissTimeout: state.dismissTimeout,
+      enabled:       state.enabled,
+      notifEnabled:  document.getElementById('notif-toggle')?.checked ?? false,
+      message:       document.getElementById('chime-message')?.value ?? '',
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Could not save settings:', e); }
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+
+    if (d.chime)          state.chime = d.chime;
+    if (d.volume != null) state.volume = d.volume;
+    if (d.vibrateOnly != null) state.vibrateOnly = d.vibrateOnly;
+    if (d.vibrateAlso != null) state.vibrateAlso = d.vibrateAlso;
+    if (Array.isArray(d.recentSounds)) state.recentSounds = d.recentSounds;
+    if (d.startHour != null) state.startHour = d.startHour;
+    if (d.endHour   != null) state.endHour   = d.endHour;
+    if (Array.isArray(d.hours)) state.hours = new Set(d.hours);
+    if (Array.isArray(d.days))  state.days  = new Set(d.days);
+    if (d.dismissTimeout != null) state.dismissTimeout = d.dismissTimeout;
+    if (d.enabled != null) state.enabled = d.enabled;
+
+    // Restore DOM elements
+    const volEl = document.getElementById('volume');
+    if (volEl) { volEl.value = Math.round(state.volume * 100); document.getElementById('vol-label').textContent = volEl.value + '%'; }
+
+    const startEl = document.getElementById('time-start');
+    if (startEl) startEl.value = state.startHour.toString().padStart(2,'0') + ':00';
+    const endEl = document.getElementById('time-end');
+    if (endEl) endEl.value = state.endHour.toString().padStart(2,'0') + ':00';
+
+    const masterEl = document.getElementById('master-toggle');
+    if (masterEl) masterEl.checked = state.enabled;
+    document.getElementById('status-dot')?.classList.toggle('active', state.enabled);
+    document.getElementById('status-text').textContent = state.enabled ? 'Chime Active' : 'Chime Off';
+    document.getElementById('status-sub').textContent  = state.enabled ? 'Chiming at scheduled hours' : 'Enable to activate hourly chimes';
+
+    // Restore timeout chip selection
+    document.querySelectorAll('.timeout-chip').forEach(c => {
+      c.classList.toggle('selected', parseInt(c.dataset.sec) === state.dismissTimeout);
+    });
+
+    // Restore notif toggle
+    if (d.notifEnabled) {
+      const nt = document.getElementById('notif-toggle');
+      if (nt) nt.checked = true;
+    }
+
+    // Restore message
+    if (d.message != null) {
+      const msgEl = document.getElementById('chime-message');
+      if (msgEl) msgEl.value = d.message;
+    }
+  } catch(e) { console.warn('Could not load settings:', e); }
+}
+
 // ── Init ──
+loadSettings();      // restore before building UI
 buildSoundUI();
 buildHourGrid();
 buildDayGrid();
@@ -965,6 +1049,11 @@ buildArc();
 renderMissed();
 renderNotifUI();
 if('permissions'in navigator){navigator.permissions.query({name:'notifications'}).then(s=>{s.onchange=renderNotifUI;}).catch(()=>{});}
+if('serviceWorker'in navigator)registerSW();
+setInterval(updateDiag,2000);
+setInterval(tick,1000);
+setInterval(saveSettings,5000);  // autosave every 5s
+tick();
 if('serviceWorker'in navigator)registerSW();
 setInterval(updateDiag,2000);
 setInterval(tick,1000);
