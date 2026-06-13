@@ -1048,6 +1048,7 @@ async function requestNotifPermission() {
 }
 
 function onNotifToggle(checked) {
+  console.log('onNotifToggle called, checked=', checked);
   if (!('Notification' in window) || isIOS) {
     document.getElementById('notif-toggle').checked = false;
     return;
@@ -1058,7 +1059,24 @@ function onNotifToggle(checked) {
     return;
   }
   notifEnabled = checked;
+  console.log('notifEnabled set to', notifEnabled);
   if (checked && !swReg) registerSW();
+  updateDiag();
+}
+
+function getDiag() {
+  return [
+    `Permission: ${Notification.permission}`,
+    `SW supported: ${'serviceWorker' in navigator}`,
+    `SW registered: ${swReg ? 'yes' : (swRegError ? 'FAILED: ' + swRegError : 'no')}`,
+    `Notifications enabled: ${notifEnabled}`,
+    `Standalone PWA: ${window.matchMedia('(display-mode: standalone)').matches}`,
+  ].join(' · ');
+}
+
+function updateDiag() {
+  const el = document.getElementById('notif-diag');
+  if (el) el.textContent = getDiag();
 }
 
 function renderNotifUI() {
@@ -1084,35 +1102,25 @@ function renderNotifUI() {
   }
 
   const perm = Notification.permission;
-  const swOk = 'serviceWorker' in navigator;
-
-  // Build diagnostic string
-  const diag = [
-    `Permission: ${perm}`,
-    `SW supported: ${swOk}`,
-    `SW registered: ${swReg ? 'yes' : (swRegError ? 'FAILED: ' + swRegError : 'no')}`,
-    `Notifications enabled: ${notifEnabled}`,
-    `Standalone PWA: ${window.matchMedia('(display-mode: standalone)').matches}`,
-  ].join(' · ');
 
   if (perm === 'granted') {
     badge.className = 'nperm granted';
     permTxt.textContent = 'Permission granted';
     actions.innerHTML = `
-      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>
+      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>
       <button class="notif-req-btn secondary" onclick="testNotification()">Send Test Notification</button>`;
   } else if (perm === 'denied') {
     badge.className = 'nperm denied';
     permTxt.textContent = 'Permission denied';
     actions.innerHTML = `
-      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>
+      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>
       <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Go to Android Settings → Apps → Chrome → Notifications, and make sure notifications are allowed. Then reload the app.</p>`;
     document.getElementById('notif-toggle').disabled = true;
   } else {
     badge.className = 'nperm unknown';
     permTxt.textContent = 'Permission not yet granted';
     actions.innerHTML = `
-      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>`;
+      <div id="notif-diag" style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${getDiag()}</div>`;
     const btn = document.createElement('button');
     btn.className = 'notif-req-btn primary';
     btn.textContent = 'Enable Notifications';
@@ -1176,14 +1184,17 @@ async function testNotification() {
   };
   try {
     if (swReg) {
+      console.log('Sending via SW...');
       await swReg.showNotification(title, opts);
-      showToast('Test notification sent via SW');
+      showToast('Sent via SW ✓ — check shade');
     } else {
+      console.log('Sending via Notification API...');
       const n = new Notification(title, { body: opts.body, requireInteraction: true, silent: true });
       n.onclick = () => { n.close(); window.focus(); };
-      showToast('Test notification sent (no SW)');
+      showToast('Sent via Notification API ✓ — check shade');
     }
   } catch(err) {
+    console.error('Notification error:', err);
     showToast('Error: ' + err.message);
   }
 }
@@ -1196,6 +1207,8 @@ if ('permissions' in navigator) {
     status.onchange = renderNotifUI;
   }).catch(() => {});
 }
+// Keep diagnostic live — refresh every 2s
+setInterval(updateDiag, 2000);
 
 // ── Notif toggle ──
 document.getElementById('notif-toggle').addEventListener('change', e => onNotifToggle(e.target.checked));
