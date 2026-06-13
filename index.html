@@ -1011,9 +1011,10 @@ function showToast(msg) {
 // ── Notifications ──
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-let swReg = null;          // ServiceWorkerRegistration
-let activeNotif = null;    // Notification object (non-SW path)
-let notifEnabled = false;  // user toggle
+let swReg = null;
+let swRegError = null;
+let activeNotif = null;
+let notifEnabled = false;
 
 // --- Service Worker source (handles notificationclick + notificationclose) ---
 const SW_SOURCE = `
@@ -1050,14 +1051,18 @@ async function registerSW() {
     const blob = new Blob([SW_SOURCE], { type: 'application/javascript' });
     const url  = URL.createObjectURL(blob);
     swReg = await navigator.serviceWorker.register(url, { scope: './' });
+    console.log('SW registered:', swReg);
     // Listen for messages from SW
     navigator.serviceWorker.addEventListener('message', e => {
       if (e.data?.type === 'DISMISS_CHIME') dismissChime();
       if (e.data?.type === 'FOCUS_APP')    showDismissOverlay(activeAlarmHour ?? new Date().getHours());
     });
+    renderNotifUI(); // re-render now SW status is known
     return true;
   } catch(err) {
     console.warn('SW registration failed:', err);
+    swRegError = err.message;
+    renderNotifUI();
     return false;
   }
 }
@@ -1110,19 +1115,35 @@ function renderNotifUI() {
   }
 
   const perm = Notification.permission;
+  const swOk = 'serviceWorker' in navigator;
+
+  // Build diagnostic string
+  const diag = [
+    `Permission: ${perm}`,
+    `SW supported: ${swOk}`,
+    `SW registered: ${swReg ? 'yes' : (swRegError ? 'FAILED: ' + swRegError : 'no')}`,
+    `Notifications enabled: ${notifEnabled}`,
+    `Standalone PWA: ${window.matchMedia('(display-mode: standalone)').matches}`,
+  ].join(' · ');
+
   if (perm === 'granted') {
     badge.className = 'nperm granted';
     permTxt.textContent = 'Permission granted';
-    actions.innerHTML = '';
+    actions.innerHTML = `
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>
+      <button class="notif-req-btn secondary" onclick="testNotification()">Send Test Notification</button>`;
   } else if (perm === 'denied') {
     badge.className = 'nperm denied';
     permTxt.textContent = 'Permission denied';
-    actions.innerHTML = `<p style="font-size:12px;color:var(--text-muted)">Notifications are blocked. Enable them in your browser's site settings, then reload.</p>`;
+    actions.innerHTML = `
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Go to Android Settings → Apps → Chrome → Notifications, and make sure notifications are allowed. Then reload the app.</p>`;
     document.getElementById('notif-toggle').disabled = true;
   } else {
     badge.className = 'nperm unknown';
     permTxt.textContent = 'Permission not yet granted';
-    actions.innerHTML = '';
+    actions.innerHTML = `
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.6;word-break:break-all">${diag}</div>`;
     const btn = document.createElement('button');
     btn.className = 'notif-req-btn primary';
     btn.textContent = 'Enable Notifications';
@@ -1167,8 +1188,35 @@ async function showChimeNotification(h) {
 
 function closeActiveNotif() {
   if (activeNotif) { activeNotif.close(); activeNotif = null; }
-  // Also close any SW notifications
   if (swReg) swReg.getNotifications({ tag: 'hourly-chime' }).then(ns => ns.forEach(n => n.close()));
+}
+
+async function testNotification() {
+  if (Notification.permission !== 'granted') {
+    showToast('Permission not granted');
+    return;
+  }
+  const h = new Date().getHours();
+  const title = `⏰ ${formatHour(h)} — Test Notification`;
+  const opts = {
+    body: 'If you see this, notifications are working! Tap Dismiss to test that action.',
+    tag: 'hourly-chime-test',
+    requireInteraction: true,
+    silent: true,
+    actions: [{ action: 'dismiss', title: 'Dismiss' }],
+  };
+  try {
+    if (swReg) {
+      await swReg.showNotification(title, opts);
+      showToast('Test notification sent via SW');
+    } else {
+      const n = new Notification(title, { body: opts.body, requireInteraction: true, silent: true });
+      n.onclick = () => { n.close(); window.focus(); };
+      showToast('Test notification sent (no SW)');
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message);
+  }
 }
 
 // ── Init notifications UI ──
