@@ -244,7 +244,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.09</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.10</span>
   </div>
 </header>
 
@@ -368,7 +368,7 @@
         </button>
       </div>
       <button class="action-btn" onclick="testChime()">▶ Test Selected Chime</button>
-      <button class="action-btn" style="border-color:#475569" onclick="scheduleTestFire()">⏱ Fire at Next :00 (verify timing)</button>
+      <button class="action-btn" style="border-color:#475569" onclick="scheduleTestFire()">⏱ Fire at Next Minute (quick test)</button>
     </div>
   </div>
   <div class="section">
@@ -681,11 +681,19 @@ function formatHour(h){const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return
 function formatHourMin(h,m){const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return `${h12}:${m.toString().padStart(2,'0')} ${ap}`;}
 function slotToLabel(slot){const h=Math.floor(slot/2),m=(slot%2)*30;return formatHourMin(h,m);}
 
-let lastCheckedSlot=-1, testNextSlot=false;
+let lastCheckedSlot=-1, testNextSlot=false, testNextMinuteOnly=false, lastCheckedMinute=-1;
 function tick() {
   const now=new Date();
   document.getElementById('live-clock').textContent=formatTime(now);
   const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+
+  // Fast test: fires at the very next minute rollover, regardless of schedule
+  if(testNextMinuteOnly && s<3 && m!==lastCheckedMinute){
+    lastCheckedMinute=m;
+    testNextMinuteOnly=false;
+    const slot=h*2+(m>=30?1:0);
+    triggerChime(slot);
+  }
 
   // In half-hour mode, slot boundaries are :00 and :30. Otherwise only :00.
   const atBoundary = state.halfHourMode ? (m===0||m===30) : (m===0);
@@ -949,23 +957,11 @@ document.getElementById('timeout-chips').addEventListener('click',e=>{
 
 // ── Test ──
 function testChime(){const now=new Date();triggerChime(now.getHours()*2+(now.getMinutes()>=30?1:0));}
+// Fires at the next real minute rollover — fast, for verifying audio/notification work at all
 function scheduleTestFire(){
-  testNextSlot=true;
-  const now=new Date();
-  const m=now.getMinutes(), s=now.getSeconds();
-
-  let secsToNext;
-  if(state.halfHourMode){
-    // next boundary is the next :00 or :30, whichever comes first
-    const nextBoundaryMin = m<30 ? 30 : 60;
-    secsToNext = (nextBoundaryMin - m)*60 - s;
-  } else {
-    // next boundary is always the next :00
-    secsToNext = (60 - m)*60 - s;
-  }
-  if(secsToNext<=0) secsToNext += state.halfHourMode ? 1800 : 3600;
-
-  showToast(`⏱ Will fire in ~${secsToNext}s`);
+  testNextMinuteOnly=true;
+  const s=60-new Date().getSeconds();
+  showToast(`⏱ Will fire in ~${s}s (next minute)`);
 }
 
 // ── Tabs ──
