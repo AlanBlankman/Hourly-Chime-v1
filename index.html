@@ -244,7 +244,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.06</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.07</span>
   </div>
 </header>
 
@@ -386,6 +386,20 @@
 <!-- More (Additional Settings) tab -->
 <div class="tab-panel" id="tab-more">
   <div class="section" style="margin-top:14px">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Half-Hour Intervals</span>
+      <label class="toggle" style="margin:0">
+        <input type="checkbox" id="halfhour-toggle">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <div class="section-body">
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.5">When on, schedule chimes at both the hour and half-hour (e.g. 8:00, 8:30, 9:00…) instead of only on the hour.</div>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-header">Dismiss Timeout</div>
     <div class="section-body">
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">Chime repeats until dismissed or timeout expires</div>
@@ -464,7 +478,8 @@ const SOUNDS = [
 // ── State ──
 const state = {
   enabled: false,
-  hours: new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]),
+  hours: new Set(Array.from({length:24},(_,h)=>h*2)),  // slot indices: slot = hour*2 + (0=:00, 1=:30)
+  halfHourMode: false,
   days: new Set([0,1,2,3,4,5,6]),
   startHour: 8, endHour: 22,
   chime: 'bell',
@@ -589,9 +604,9 @@ function stopChimeLoop() { loopActive=false; clearTimeout(loopTimer); loopTimer=
 const CIRC=2*Math.PI*62;
 let dismissTimer=null, dismissInterval=null, activeAlarmHour=null;
 
-function showDismissOverlay(h) {
-  activeAlarmHour=h;
-  document.getElementById('dismiss-hour-text').textContent=formatHour(h);
+function showDismissOverlay(slot) {
+  activeAlarmHour=slot;
+  document.getElementById('dismiss-hour-text').textContent=slotToLabel(slot);
   const msg=document.getElementById('chime-message').value.trim();
   document.getElementById('dismiss-message').textContent=msg;
   document.getElementById('dismiss-overlay').classList.add('active');
@@ -619,7 +634,7 @@ function showDismissOverlay(h) {
   };
   update();
   dismissInterval=setInterval(()=>{ remaining=Math.max(0,remaining-1); update(); },1000);
-  dismissTimer=setTimeout(()=>missChime(h),timeout*1000);
+  dismissTimer=setTimeout(()=>missChime(slot),timeout*1000);
 }
 
 function dismissChime() {
@@ -627,11 +642,11 @@ function dismissChime() {
   document.getElementById('dismiss-overlay').classList.remove('active');
   closeActiveNotif(); activeAlarmHour=null;
 }
-function missChime(h) {
+function missChime(slot) {
   stopChimeLoop(); clearInterval(dismissInterval);
   document.getElementById('dismiss-overlay').classList.remove('active');
   closeActiveNotif();
-  missedAlarms.unshift({hour:h,ts:new Date()});
+  missedAlarms.unshift({slot:slot,ts:new Date()});
   renderMissed(); activeAlarmHour=null;
 }
 
@@ -646,106 +661,193 @@ function renderMissed() {
     const ts=m.ts.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const ds=m.ts.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
     const item=document.createElement('div'); item.className='missed-item';
-    item.innerHTML=`<span class="missed-icon">🔕</span><div class="missed-text"><div class="missed-time">Missed: ${formatHour(m.hour)}</div><div class="missed-sub">Timed out at ${ts} · ${ds}</div></div>`;
+    item.innerHTML=`<span class="missed-icon">🔕</span><div class="missed-text"><div class="missed-time">Missed: ${slotToLabel(m.slot)}</div><div class="missed-sub">Timed out at ${ts} · ${ds}</div></div>`;
     list.appendChild(item);
   });
 }
 function clearMissed(){missedAlarms=[];renderMissed();}
 
 // ── Trigger ──
-async function triggerChime(h) {
+async function triggerChime(slot) {
   await resumeAudio();
   startChimeLoop(state.vibrateOnly?'vibrate':state.chime);
-  showDismissOverlay(h);
-  showChimeNotification(h);
+  showDismissOverlay(slot);
+  showChimeNotification(slot);
 }
 
 // ── Clock ──
 function formatTime(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
 function formatHour(h){const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return `${h12}:00 ${ap}`;}
+function formatHourMin(h,m){const ap=h<12?'AM':'PM';const h12=h%12===0?12:h%12;return `${h12}:${m.toString().padStart(2,'0')} ${ap}`;}
+function slotToLabel(slot){const h=Math.floor(slot/2),m=(slot%2)*30;return formatHourMin(h,m);}
 
-let lastCheckedHour=-1, testNextMinute=false;
+let lastCheckedSlot=-1, testNextSlot=false;
 function tick() {
   const now=new Date();
   document.getElementById('live-clock').textContent=formatTime(now);
   const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
-  if(testNextMinute&&s<5){testNextMinute=false;triggerChime(h);}
-  if(m===0&&s<5&&h!==lastCheckedHour){
-    lastCheckedHour=h;
-    if(shouldChimeAt(h,now.getDay()))triggerChime(h);
-  } else if(m!==0){lastCheckedHour=-1;}
+
+  // In half-hour mode, slot boundaries are :00 and :30. Otherwise only :00.
+  const atBoundary = state.halfHourMode ? (m===0||m===30) : (m===0);
+  const slot = h*2 + (m>=30?1:0);
+
+  if(testNextSlot && atBoundary && s<5){
+    testNextSlot=false;
+    triggerChime(slot);
+  }
+
+  if(atBoundary && s<5 && slot!==lastCheckedSlot){
+    lastCheckedSlot=slot;
+    if(shouldChimeAt(slot,now.getDay()))triggerChime(slot);
+  } else if(!atBoundary){
+    lastCheckedSlot=-1;
+  }
   updateNextChime(now);
 }
-function shouldChimeAt(h,day){
+function shouldChimeAt(slot,day){
   if(!state.enabled)return false;
-  if(!state.hours.has(h))return false;
+  if(!state.hours.has(slot))return false;
   if(!state.days.has(day))return false;
+  const h=Math.floor(slot/2);
   if(h<state.startHour||h>=state.endHour)return false;
   return true;
 }
 function updateNextChime(now){
   if(!state.enabled){document.getElementById('next-time').textContent='——';document.getElementById('next-countdown').textContent='Chime disabled';return;}
-  for(let d=1;d<=24;d++){
-    const t=new Date(now); t.setMinutes(0,0,0); t.setHours(now.getHours()+d);
-    const h=t.getHours(),day=t.getDay();
-    if(shouldChimeAt(h,day)){
-      const diff=t-now,mins=Math.floor(diff/60000),hrs=Math.floor(mins/60),rem=mins%60;
-      document.getElementById('next-time').textContent=formatHour(h);
+  const slotsPerDay = state.halfHourMode ? 48 : 24;
+  const curSlot = now.getHours()*2 + (now.getMinutes()>=30?1:0);
+  const totalToScan = slotsPerDay * 2; // scan up to 2 days ahead worth of slots
+  const stepSlots = state.halfHourMode ? 1 : 2; // step by 1 half-hour slot, or by full hours (2 slots) if not half-hour mode
+
+  for(let i=stepSlots;i<=totalToScan;i+=stepSlots){
+    const targetSlot = curSlot + i;
+    const dayOffset = Math.floor(targetSlot/48);
+    const slotOfDay = targetSlot % 48;
+    const h = Math.floor(slotOfDay/2);
+    const mm = (slotOfDay%2)*30;
+
+    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate()+dayOffset, h, mm, 0, 0);
+    const day = t.getDay();
+
+    if(shouldChimeAt(slotOfDay, day)){
+      const diff=t-now, mins=Math.floor(diff/60000), hrs=Math.floor(mins/60), rem=mins%60;
+      document.getElementById('next-time').textContent=formatHourMin(h,mm);
       document.getElementById('next-countdown').textContent=hrs>0?`in ${hrs}h ${rem}m`:`in ${mins}m`;
       return;
     }
   }
   document.getElementById('next-time').textContent='——';
-  document.getElementById('next-countdown').textContent='No hours scheduled';
+  document.getElementById('next-countdown').textContent='No times scheduled';
 }
 
 // ── Arc SVG ──
 function buildArc(){
   const svg=document.getElementById('arc-svg'); svg.innerHTML='';
-  const cx=110,cy=110,r=90,ir=58,total=24,gap=2.5,dpH=360/total;
-  const numActive=[...state.hours].filter(h=>h>=state.startHour&&h<state.endHour).length;
+  const cx=110,cy=110,r=90,ir=58;
+  const total = state.halfHourMode ? 48 : 24;
+  const gap = state.halfHourMode ? 1.4 : 2.5;
+  const dpSlot=360/total;
+  const numActive=[...state.hours].filter(slot=>{
+    const h=Math.floor(slot/2);
+    if(h<state.startHour||h>=state.endHour)return false;
+    if(!state.halfHourMode && slot%2!==0)return false; // ignore stray half-slots when mode is off
+    return true;
+  }).length;
   const mk=(tag,attrs)=>{const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
   svg.appendChild(Object.assign(mk('text',{x:cx,y:cy-6,'text-anchor':'middle',fill:'#e2e8f0','font-family':'JetBrains Mono,monospace','font-size':'28','font-weight':'600'}),{textContent:numActive}));
-  svg.appendChild(Object.assign(mk('text',{x:cx,y:cy+16,'text-anchor':'middle',fill:'#64748b','font-family':'Inter,sans-serif','font-size':'11'}),{textContent:'hours active'}));
-  for(let h=0;h<24;h++){
-    const s0=(h*dpH-90+gap/2)*Math.PI/180,s1=(h*dpH-90+dpH-gap/2)*Math.PI/180;
+  svg.appendChild(Object.assign(mk('text',{x:cx,y:cy+16,'text-anchor':'middle',fill:'#64748b','font-family':'Inter,sans-serif','font-size':'11'}),{textContent:state.halfHourMode?'slots active':'hours active'}));
+
+  for(let i=0;i<total;i++){
+    // slot index in 48-space, whether or not halfHourMode is on
+    const slot = state.halfHourMode ? i : i*2;
+    const h = Math.floor(slot/2);
+    const s0=(i*dpSlot-90+gap/2)*Math.PI/180,s1=(i*dpSlot-90+dpSlot-gap/2)*Math.PI/180;
     const x1=cx+r*Math.cos(s0),y1=cy+r*Math.sin(s0),x2=cx+r*Math.cos(s1),y2=cy+r*Math.sin(s1);
     const x3=cx+ir*Math.cos(s1),y3=cy+ir*Math.sin(s1),x4=cx+ir*Math.cos(s0),y4=cy+ir*Math.sin(s0);
     const inWin=h>=state.startHour&&h<state.endHour;
-    const active=state.hours.has(h)&&inWin&&state.enabled,sched=state.hours.has(h)&&inWin;
+    const active=state.hours.has(slot)&&inWin&&state.enabled, sched=state.hours.has(slot)&&inWin;
     const path=mk('path',{d:`M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 0 0 ${x4} ${y4}Z`,fill:active?'#f59e0b':sched?'rgba(245,158,11,0.25)':'#1e2535',stroke:'#0f1117','stroke-width':'1'});
     svg.appendChild(path);
-    if(h%6===0){
-      const midA=(h*dpH-90+dpH/2)*Math.PI/180,lr=r+13;
+
+    const labelEvery = state.halfHourMode ? 12 : 6; // every 6 hours
+    if(i%labelEvery===0){
+      const midA=(i*dpSlot-90+dpSlot/2)*Math.PI/180,lr=r+13;
       const lbl=mk('text',{x:cx+lr*Math.cos(midA),y:cy+lr*Math.sin(midA)+4,'text-anchor':'middle',fill:'#64748b','font-family':'JetBrains Mono,monospace','font-size':'9'});
-      lbl.textContent=h===0?'12a':h===6?'6a':h===12?'12p':'6p'; svg.appendChild(lbl);
+      lbl.textContent=h===0?'12a':h===6?'6a':h===12?'12p':h===18?'6p':'';
+      svg.appendChild(lbl);
     }
   }
 }
 
-// ── Hour grid ──
+// ── Hour grid (supports half-hour slots) ──
 function buildHourGrid(){
   const grid=document.getElementById('hour-grid'); grid.innerHTML='';
-  for(let h=0;h<24;h++){
-    const inWin=h>=state.startHour&&h<state.endHour;
-    const cell=document.createElement('button');
-    cell.className='hour-cell'+(state.hours.has(h)?' active':'')+(inWin?'':' disabled');
-    cell.textContent=h.toString().padStart(2,'0');
-    cell.addEventListener('click',()=>{
-      if(!inWin){showToast('Outside active window');return;}
-      state.hours.has(h)?state.hours.delete(h):state.hours.add(h);
-      buildHourGrid();buildArc();saveSettings();
-    });
-    grid.appendChild(cell);
+  grid.style.gridTemplateColumns = state.halfHourMode ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)';
+
+  if(!state.halfHourMode){
+    // Classic 24-cell hour grid, using even slots (h*2) as the canonical hour representation
+    for(let h=0;h<24;h++){
+      const slot=h*2;
+      const inWin=h>=state.startHour&&h<state.endHour;
+      const cell=document.createElement('button');
+      cell.className='hour-cell'+(state.hours.has(slot)?' active':'')+(inWin?'':' disabled');
+      cell.textContent=h.toString().padStart(2,'0');
+      cell.addEventListener('click',()=>{
+        if(!inWin){showToast('Outside active window');return;}
+        state.hours.has(slot)?state.hours.delete(slot):state.hours.add(slot);
+        buildHourGrid();buildArc();saveSettings();
+      });
+      grid.appendChild(cell);
+    }
+  } else {
+    // 48-cell half-hour grid
+    for(let slot=0;slot<48;slot++){
+      const h=Math.floor(slot/2), m=(slot%2)*30;
+      const inWin=h>=state.startHour&&h<state.endHour;
+      const cell=document.createElement('button');
+      cell.className='hour-cell'+(state.hours.has(slot)?' active':'')+(inWin?'':' disabled');
+      cell.style.fontSize='9px';
+      cell.textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+      cell.addEventListener('click',()=>{
+        if(!inWin){showToast('Outside active window');return;}
+        state.hours.has(slot)?state.hours.delete(slot):state.hours.add(slot);
+        buildHourGrid();buildArc();saveSettings();
+      });
+      grid.appendChild(cell);
+    }
   }
 }
+
 function applyHourPreset(type){
   state.hours.clear();
-  for(let h=0;h<24;h++){
-    const inWin=h>=state.startHour&&h<state.endHour; if(!inWin)continue;
-    if(type==='all')state.hours.add(h);
-    else if(type==='even'&&h%2===0)state.hours.add(h);
-    else if(type==='odd'&&h%2!==0)state.hours.add(h);
+  if(!state.halfHourMode){
+    for(let h=0;h<24;h++){
+      const inWin=h>=state.startHour&&h<state.endHour; if(!inWin)continue;
+      const slot=h*2;
+      if(type==='all')state.hours.add(slot);
+      else if(type==='even'&&h%2===0)state.hours.add(slot);
+      else if(type==='odd'&&h%2!==0)state.hours.add(slot);
+    }
+  } else {
+    for(let slot=0;slot<48;slot++){
+      const h=Math.floor(slot/2);
+      const inWin=h>=state.startHour&&h<state.endHour; if(!inWin)continue;
+      if(type==='all')state.hours.add(slot);
+      else if(type==='even'&&h%2===0)state.hours.add(slot);
+      else if(type==='odd'&&h%2!==0)state.hours.add(slot);
+    }
+  }
+  buildHourGrid();buildArc();saveSettings();
+}
+
+function toggleHalfHourMode(checked){
+  state.halfHourMode=checked;
+  // Convert existing selections sensibly when switching modes
+  if(checked){
+    // going from hourly -> half-hourly: keep the same hour selections (already stored as h*2 slots)
+  } else {
+    // going from half-hourly -> hourly: collapse — keep only on-the-hour slots
+    state.hours = new Set([...state.hours].filter(s=>s%2===0));
   }
   buildHourGrid();buildArc();saveSettings();
 }
@@ -836,6 +938,8 @@ document.getElementById('master-toggle').addEventListener('change',e=>{
 document.getElementById('volume').addEventListener('input',e=>{state.volume=e.target.value/100;document.getElementById('vol-label').textContent=e.target.value+'%';saveSettings();});
 
 // ── Timeout chips ──
+document.getElementById('halfhour-toggle').addEventListener('change',e=>toggleHalfHourMode(e.target.checked));
+
 document.getElementById('timeout-chips').addEventListener('click',e=>{
   const chip=e.target.closest('.timeout-chip'); if(!chip)return;
   document.querySelectorAll('.timeout-chip').forEach(c=>c.classList.remove('selected'));
@@ -844,8 +948,15 @@ document.getElementById('timeout-chips').addEventListener('click',e=>{
 });
 
 // ── Test ──
-function testChime(){triggerChime(new Date().getHours());}
-function scheduleTestFire(){testNextMinute=true;const s=60-new Date().getSeconds();showToast(`⏱ Will fire in ~${s}s at :00`);}
+function testChime(){const now=new Date();triggerChime(now.getHours()*2+(now.getMinutes()>=30?1:0));}
+function scheduleTestFire(){
+  testNextSlot=true;
+  const now=new Date();
+  const secsToNextHalf = state.halfHourMode
+    ? (now.getMinutes()<30 ? (30-now.getMinutes())*60-now.getSeconds() : (60-now.getMinutes())*60-now.getSeconds())
+    : (60-now.getMinutes())*60-now.getSeconds();
+  showToast(`⏱ Will fire in ~${secsToNextHalf}s`);
+}
 
 // ── Tabs ──
 document.querySelectorAll('.tab').forEach(tab=>{
@@ -874,7 +985,11 @@ async function registerSW(){
     swReg=await navigator.serviceWorker.register('./sw.js',{scope:'./'});
     navigator.serviceWorker.addEventListener('message',e=>{
       if(e.data?.type==='DISMISS_CHIME')dismissChime();
-      if(e.data?.type==='FOCUS_APP')showDismissOverlay(activeAlarmHour??new Date().getHours());
+      if(e.data?.type==='FOCUS_APP'){
+        const now=new Date();
+        const fallbackSlot=now.getHours()*2+(now.getMinutes()>=30?1:0);
+        showDismissOverlay(activeAlarmHour??fallbackSlot);
+      }
     });
     renderNotifUI(); return true;
   }catch(err){
@@ -917,12 +1032,12 @@ function renderNotifUI(){
   }
 }
 
-async function showChimeNotification(h){
+async function showChimeNotification(slot){
   const toggleOn=document.getElementById('notif-toggle')?.checked;
   if(!toggleOn)return;
   if(Notification.permission!=='granted')return;
   const msg=document.getElementById('chime-message').value.trim();
-  const title=`⏰ ${formatHour(h)} — Hourly Chime`;
+  const title=`⏰ ${slotToLabel(slot)} — Hourly Chime`;
   const body=msg?`${msg}\nTap to open · Dismiss to stop`:' Tap to open the app, or Dismiss to stop the chime.';
   const opts={body,tag:'hourly-chime',renotify:true,requireInteraction:true,actions:[{action:'dismiss',title:'Dismiss'}],vibrate:[200,100,200]};
   try{
@@ -930,7 +1045,7 @@ async function showChimeNotification(h){
     else{
       closeActiveNotif();
       const n=new Notification(title,{body,requireInteraction:true});
-      n.onclick=()=>{n.close();window.focus();showDismissOverlay(h);};
+      n.onclick=()=>{n.close();window.focus();showDismissOverlay(slot);};
       n.onclose=()=>dismissChime(); activeNotif=n;
     }
   }catch(err){console.warn('Notification error:',err);}
@@ -943,9 +1058,10 @@ function closeActiveNotif(){
 
 async function testNotification(){
   if(Notification.permission!=='granted'){showToast('Permission not granted');return;}
-  const h=new Date().getHours();
+  const now=new Date();
+  const slot=now.getHours()*2+(now.getMinutes()>=30?1:0);
   const msg=document.getElementById('chime-message').value.trim();
-  const title=`⏰ ${formatHour(h)} — Test Notification`;
+  const title=`⏰ ${slotToLabel(slot)} — Test Notification`;
   const body=msg?`${msg}\nNotifications are working!`:'Notifications are working! Tap Dismiss to test.';
   try{
     if(swReg){await swReg.showNotification(title,{body,tag:'hourly-chime-test',requireInteraction:true,actions:[{action:'dismiss',title:'Dismiss'}]});showToast('✓ Sent — check shade');}
@@ -980,6 +1096,7 @@ function saveSettings() {
       hours:         [...state.hours],
       days:          [...state.days],
       dismissTimeout: state.dismissTimeout,
+      halfHourMode:  state.halfHourMode,
       enabled:       state.enabled,
       notifEnabled:  document.getElementById('notif-toggle')?.checked ?? false,
       message:       document.getElementById('chime-message')?.value ?? '',
@@ -1004,6 +1121,11 @@ function loadSettings() {
     if (Array.isArray(d.hours)) state.hours = new Set(d.hours);
     if (Array.isArray(d.days))  state.days  = new Set(d.days);
     if (d.dismissTimeout != null) state.dismissTimeout = d.dismissTimeout;
+    if (d.halfHourMode != null) {
+      state.halfHourMode = d.halfHourMode;
+      const hhEl = document.getElementById('halfhour-toggle');
+      if (hhEl) hhEl.checked = state.halfHourMode;
+    }
     if (d.enabled != null) state.enabled = d.enabled;
 
     // Restore DOM elements
