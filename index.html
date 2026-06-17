@@ -244,7 +244,7 @@
   <h1>⏰ Hourly Chime</h1>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
     <span id="live-clock">--:--:--</span>
-    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.07</span>
+    <span style="font-size:9px;color:var(--text-muted);letter-spacing:0.06em">v0.09</span>
   </div>
 </header>
 
@@ -952,10 +952,20 @@ function testChime(){const now=new Date();triggerChime(now.getHours()*2+(now.get
 function scheduleTestFire(){
   testNextSlot=true;
   const now=new Date();
-  const secsToNextHalf = state.halfHourMode
-    ? (now.getMinutes()<30 ? (30-now.getMinutes())*60-now.getSeconds() : (60-now.getMinutes())*60-now.getSeconds())
-    : (60-now.getMinutes())*60-now.getSeconds();
-  showToast(`⏱ Will fire in ~${secsToNextHalf}s`);
+  const m=now.getMinutes(), s=now.getSeconds();
+
+  let secsToNext;
+  if(state.halfHourMode){
+    // next boundary is the next :00 or :30, whichever comes first
+    const nextBoundaryMin = m<30 ? 30 : 60;
+    secsToNext = (nextBoundaryMin - m)*60 - s;
+  } else {
+    // next boundary is always the next :00
+    secsToNext = (60 - m)*60 - s;
+  }
+  if(secsToNext<=0) secsToNext += state.halfHourMode ? 1800 : 3600;
+
+  showToast(`⏱ Will fire in ~${secsToNext}s`);
 }
 
 // ── Tabs ──
@@ -1082,10 +1092,12 @@ document.addEventListener('change',e=>{
 
 // ── Persist settings ──
 const STORAGE_KEY = 'hourlyChimeSettings_v1';
+const STORAGE_SCHEMA_VERSION = 2; // v2 = slot-based hours (introduced with half-hour mode)
 
 function saveSettings() {
   try {
     const data = {
+      schemaVersion: STORAGE_SCHEMA_VERSION,
       chime:         state.chime,
       volume:        state.volume,
       vibrateOnly:   state.vibrateOnly,
@@ -1110,6 +1122,13 @@ function loadSettings() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
+
+    // Migrate old (pre-slot) format: hours were plain 0-23 hour numbers.
+    // New format: hours are slot indices 0-47 (slot = hour*2 + half).
+    if ((d.schemaVersion == null || d.schemaVersion < 2) && Array.isArray(d.hours)) {
+      d.hours = d.hours.map(h => h * 2);  // convert hour -> on-the-hour slot
+      console.log('Migrated settings from legacy hour format to slot format');
+    }
 
     if (d.chime)          state.chime = d.chime;
     if (d.volume != null) state.volume = d.volume;
